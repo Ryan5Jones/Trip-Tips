@@ -9,11 +9,13 @@ import { createClient } from '@supabase/supabase-js';
 
 export const runtime = 'nodejs';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!, // server-only key, never expose to the browser
-  { auth: { persistSession: false } }
-);
+// Connect to Supabase only when a request comes in (so a missing key can't break the build)
+function getSupabase() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY; // server-only key, never expose to the browser
+  if (!url || !key) return null;
+  return createClient(url, key, { auth: { persistSession: false } });
+}
 
 const TRACKED_EVENTS = new Set([
   'email.delivered',
@@ -66,6 +68,12 @@ export async function POST(request: Request) {
   }
 
   // 3) Save it
+  const supabase = getSupabase();
+  if (!supabase) {
+    console.error('Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in Vercel');
+    return NextResponse.json({ error: 'Server not configured' }, { status: 500 });
+  }
+
   const to = event.data?.to;
   const { error } = await supabase.from('email_events').upsert(
     {
