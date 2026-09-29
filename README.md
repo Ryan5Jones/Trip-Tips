@@ -36,4 +36,4 @@ curl -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/dail
 - Set `MAILING_ADDRESS`. CAN-SPAM requires a physical address in every email.
 - If you have EU users, add a privacy policy and consent wording (GDPR).
 - The cron sends in one batch at 15:00 UTC and handles up to 500 subscribers per run. For more, paginate or send in batches with a queue.
-- LLM content can be wrong. Prompts avoid safety/visa/legal claims, and emails carry an "official advisories" footer. Consider spot-checking the `content_cache` table.
+- LLM content can be wrong. Prompts avoid safety/visa/legal claims, and emails carry an "official advisories" footer. Consider spot-checking the `content_cache` table. 
