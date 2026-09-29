@@ -39,8 +39,6 @@ export default function SignupForm() {
       <label>Your email
         <input type="email" name="email" placeholder="you@example.com" required />
       </label>
-      {/* honeypot: hidden from people, filled by bots */}
-      <input name="website" tabIndex={-1} autoComplete="off" className="hp" aria-hidden="true" />
       {state.status === "error" && <p className="error" role="alert">{state.message}</p>}
       <button disabled={state.status === "loading"}>
         {state.status === "loading" ? "Signing you up..." : "Start my daily tips"}
