@@ -1,4 +1,4 @@
-// Put this file at:  app/api/resend-webhook/route.ts
+// Put this file at:  app/api/resend-webhook/route.js
 // Resend calls this URL every time an email is delivered, opened, clicked, or bounces,
 // and this saves the event into the email_events table in Supabase.
 // No extra packages needed.
@@ -25,7 +25,7 @@ const TRACKED_EVENTS = new Set([
 ]);
 
 // Checks that the request really came from Resend (using your whsec_ signing secret)
-function isFromResend(payload: string, id: string, timestamp: string, signatureHeader: string) {
+function isFromResend(payload, id, timestamp, signatureHeader) {
   const secret = process.env.RESEND_WEBHOOK_SECRET;
   if (!secret || !id || !timestamp || !signatureHeader) return false;
 
@@ -49,7 +49,7 @@ function isFromResend(payload: string, id: string, timestamp: string, signatureH
   });
 }
 
-export async function POST(request: Request) {
+export async function POST(request) {
   const payload = await request.text();
   const id = request.headers.get('svix-id') ?? '';
   const timestamp = request.headers.get('svix-timestamp') ?? '';
