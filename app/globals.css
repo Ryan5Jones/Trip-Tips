@@ -17,3 +17,8 @@ button:disabled { opacity:.6; cursor:wait; }
 .fine { color:var(--muted); font-size:.9rem; margin-top:20px; }
 .hp { position:absolute; left:-9999px; }
 @media (max-width:520px) { .row { grid-template-columns:1fr; } .wrap { padding-top:40px; } }
+.share { border:1.5px solid var(--line); border-radius:8px; padding:18px; margin:0 0 32px; background:#fff; }
+.share-title { font-weight:800; margin:0 0 4px; }
+.share-text { color:var(--muted); margin:0 0 14px; }
+.share-btn { background:var(--sun); color:var(--ink); }
+.share-btn:hover { background:#e0a800; }

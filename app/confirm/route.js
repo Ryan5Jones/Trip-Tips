@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { tripShareUrl } from "@/lib/share";
 
 export async function GET(req) {
   const token = new URL(req.url).searchParams.get("token");
@@ -10,8 +11,18 @@ export async function GET(req) {
     .from("subscribers")
     .update({ confirmed: true, unsubscribed: false })
     .eq("token", token)
-    .select("id")
+    .select("destination, start_date, end_date")
     .maybeSingle();
 
-  return NextResponse.redirect(`${base}/?status=${data ? "confirmed" : "invalid"}`);
+  if (!data) return NextResponse.redirect(`${base}/?status=invalid`);
+
+  // Include the trip so the page can show "Share this trip"
+  try {
+    const share = new URL(tripShareUrl({ destination: data.destination, startDate: data.start_date, endDate: data.end_date, base }));
+    share.searchParams.delete("via");
+    share.searchParams.set("status", "confirmed");
+    return NextResponse.redirect(share.toString());
+  } catch {
+    return NextResponse.redirect(new URL("/?status=confirmed", req.url));
+  }
 }
