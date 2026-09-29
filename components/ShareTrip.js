@@ -12,9 +12,18 @@ export default function ShareTrip({ destination, startDate, endDate }) {
     return `${window.location.origin}/?${params.toString()}`;
   }
 
+  const shareText = `I'm getting a daily tip and fun fact about ${destination} before our trip. Sign up for the same ones:`;
+
+  // Opens the viewer's email app with a ready-to-send message
+  function onEmail() {
+    const subject = `Daily tips for our ${destination} trip`;
+    const body = `${shareText}\n\n${buildUrl()}`;
+    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  }
+
   async function onShare() {
     const url = buildUrl();
-    const text = `I'm getting a daily tip and fun fact about ${destination} before our trip. Sign up for the same ones:`;
+    const text = shareText;
     if (navigator.share) {
       try {
         await navigator.share({ title: `Trip tips: ${destination}`, text, url });
@@ -36,9 +45,14 @@ export default function ShareTrip({ destination, startDate, endDate }) {
     <div className="share">
       <p className="share-title">Traveling with friends or a group?</p>
       <p className="share-text">Send them this trip so they get the same daily tips for {destination}.</p>
-      <button type="button" className="share-btn" onClick={onShare}>
-        {copied ? "Link copied!" : "Share this trip"}
-      </button>
+      <div className="share-actions">
+        <button type="button" className="share-btn" onClick={onShare}>
+          {copied ? "Link copied!" : "Share this trip"}
+        </button>
+        <button type="button" className="share-btn share-btn-alt" onClick={onEmail}>
+          Email it
+        </button>
+      </div>
     </div>
   );
 }

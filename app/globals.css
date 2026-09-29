@@ -22,3 +22,6 @@ button:disabled { opacity:.6; cursor:wait; }
 .share-text { color:var(--muted); margin:0 0 14px; }
 .share-btn { background:var(--sun); color:var(--ink); }
 .share-btn:hover { background:#e0a800; }
+.share-actions { display:flex; flex-wrap:wrap; gap:10px; }
+.share-btn-alt { background:#fff; color:var(--ink); border:1.5px solid var(--ink); }
+.share-btn-alt:hover { background:var(--paper); }
