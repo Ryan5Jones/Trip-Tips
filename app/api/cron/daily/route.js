@@ -30,7 +30,21 @@ export async function GET(req) {
     try {
       const { tip, fact } = await getContent(s.destination, s.emails_sent);
       const daysLeft = Math.round((new Date(s.start_date) - new Date(today)) / 86400000);
-      await sendDaily({ email: s.email, destination: s.destination, token: s.token, daysLeft, tip, fact });
+      const tipNumber = s.emails_sent + 1;
+      const resendEmailId = await sendDaily({
+        email: s.email, destination: s.destination, token: s.token, daysLeft, tipNumber, tip, fact,
+      });
+      // Record the send so opens/clicks can be matched to it (never blocks the email)
+      if (resendEmailId) {
+        const { error: logError } = await db.from("email_sends").insert({
+          resend_email_id: resendEmailId,
+          subscriber_email: s.email,
+          destination: s.destination,
+          tip_number: tipNumber,
+          days_left: daysLeft,
+        });
+        if (logError) console.error("Could not record send for", s.id, logError);
+      }
       await db
         .from("subscribers")
         .update({ emails_sent: s.emails_sent + 1, last_sent_on: today })
