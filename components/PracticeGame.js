@@ -6,6 +6,7 @@
 //   Results are saved through /api/practice/complete ({score: questions right, total: questions}).
 import { useEffect, useRef, useState } from "react";
 import { streakFrom } from "@/lib/streak";
+import LanguageGlobe from "@/components/LanguageGlobe";
 
 const shuffle = (arr) => {
   const a = [...arr];
@@ -260,7 +261,7 @@ function MatchQuestion({ pairs, onDone }) {
   );
 }
 
-export default function PracticeGame({ token, place, firstName, phrases, playedDays }) {
+export default function PracticeGame({ token, place, destination, firstName, phrases, playedDays }) {
   const language = phrases[0]?.language || "local";
   const newest = phrases[phrases.length - 1];
   const rank = rankFor(phrases.length);
@@ -435,11 +436,15 @@ export default function PracticeGame({ token, place, firstName, phrases, playedD
           <span className="pg-stamp-bot">{stampDate}</span>
         </div>
         <p className="pg-streak">🔥 {Math.max(streak, 1)}-day streak</p>
-        <div className="pg-bar" aria-label={`${phrases.length} of 30 travel phrases unlocked`}>
-          <span style={{ width: `${Math.min(100, (phrases.length / 30) * 100)}%` }} />
-        </div>
+        <LanguageGlobe
+          destination={destination}
+          langCode={newest.lang_code}
+          language={language}
+          place={place}
+          count={phrases.length}
+        />
         <p className="pg-fine">
-          {rank[2]} {rank[1]} · {phrases.length} of 30 travel phrases unlocked. A new one arrives with each daily email.
+          {rank[2]} {rank[1]} · A new phrase arrives with each daily email, and your country fills in a little more.
         </p>
         <div className="pg-actions">
           <button type="button" className="pg-go" onClick={start}>Play again</button>

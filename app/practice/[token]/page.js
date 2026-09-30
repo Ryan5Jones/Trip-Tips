@@ -63,6 +63,7 @@ export default async function PracticePage({ params }) {
       <PracticeGame
         token={token}
         place={place}
+        destination={sub.destination}
         firstName={firstNameFor(sub)}
         phrases={phrases}
         playedDays={(days || []).map((d) => d.day)}

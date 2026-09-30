@@ -129,3 +129,17 @@ button:disabled { opacity:.6; cursor:wait; }
 @keyframes pg-shake { 0%,100% { transform:translateX(0); } 25% { transform:translateX(-6px); } 75% { transform:translateX(6px); } }
 @keyframes pg-stamp { 0% { transform:rotate(-5deg) scale(2); opacity:0; } 100% { transform:rotate(-5deg) scale(1); opacity:.85; } }
 @media (prefers-reduced-motion:reduce) { .pg-combo, .pg-gain, .pg-stars .on, .pg-stamp, .pg-shake { animation:none; } .pg-timer span { transition:none; } }
+
+/* Globe on the Passport Quest results screen */
+.pg-globe-card { background:#fff; border:1.5px solid var(--line); border-radius:14px; padding:16px; display:grid; gap:8px; justify-items:center; text-align:center; }
+.pg-globe-card .pg-label { justify-self:start; }
+.pg-globe { width:min(100%,300px); height:auto; }
+.pg-grat { fill:none; stroke:#ffffff; stroke-opacity:.12; stroke-width:.6; }
+.pg-land { fill:#5e9c8f; stroke:#0f2e2e; stroke-opacity:.55; stroke-width:.5; }
+.pg-country { fill:var(--sun); stroke:#fff; stroke-width:1.2; transition:opacity 1.2s ease; }
+.pg-ring { fill:none; stroke:#fff; stroke-width:2; transform-box:fill-box; transform-origin:center; animation:pg-ping 1.6s ease-out infinite; }
+.pg-globe-caption { margin:0; font-size:1.15rem; }
+.pg-globe-flag { font-size:3rem; margin:0; line-height:1; }
+.pg-globe-card .pg-bar { width:100%; }
+@keyframes pg-ping { 0% { transform:scale(.6); opacity:1; } 100% { transform:scale(3.2); opacity:0; } }
+@media (prefers-reduced-motion:reduce) { .pg-ring { animation:none; } .pg-country { transition:none; } }
