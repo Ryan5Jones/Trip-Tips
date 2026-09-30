@@ -62,7 +62,9 @@ Estimated spend per month is tracked in `social_state` key `spend:YYYY-MM`.
   its people or culture.
 - Always a "link in bio" nudge (vary the wording). No links in tweets (links cost $0.20 per post vs $0.015).
 - Short enough to never show "Show more" (under ~280 characters including the photo credit line).
-- Daily tweets attach a destination photo with a credit line like "📷 name / Pixabay".
+- Daily tweets attach a photo with a credit line like "📷 name / Pixabay": first a photo matched to what the
+  tweet is about (`findMatchingPhoto` in `lib/emailPhotos.js`, same destination-specific checks as emails),
+  else a general city photo (`lib/photos.js`). Logged as TWEET_PHOTO in Vercel logs.
 - Destinations rotate through a list of 41 in `lib/tweets.js`; morning and evening use different places.
 
 ## Email style (for Gmail Primary tab)

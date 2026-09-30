@@ -16,9 +16,10 @@ import { postTweet, xConfigured } from "@/lib/twitter";
 import { getSetting } from "@/lib/settings";
 import { COST, canSpend, recordSpend } from "@/lib/budget";
 import { findDestinationPhoto } from "@/lib/photos";
+import { findMatchingPhoto } from "@/lib/emailPhotos";
 import { uploadImageFromUrl } from "@/lib/twitter";
 
-export const maxDuration = 60;
+export const maxDuration = 120; // photo matching can take several AI calls
 
 export async function GET(req) {
   const url = new URL(req.url);
@@ -90,18 +91,27 @@ export async function GET(req) {
     return NextResponse.json({ mode: "skipped: monthly X budget reached", text: row.text });
   }
 
-  // Try to attach a destination photo (Pexels). Any failure -> post text only.
+  // Photo: first try one that matches what the tweet is about (e.g. "neutral ground" -> a New Orleans
+  // median/streetcar); if none passes the checks, fall back to a general city photo. Any failure -> text only.
   let text = row.text;
   let mediaIds;
   let photoNote = "no photo";
   try {
-    const photo = await findDestinationPhoto(row.destination || "");
+    let photo = null;
+    try {
+      const m = await findMatchingPhoto(row.destination || "", row.text, "");
+      if (m) photo = { url: m.hit.largeUrl || m.hit.url, credit: `📷 ${String(m.hit.user).slice(0, 24)} / Pixabay`, sourceUrl: m.hit.page, matched: m.alt };
+    } catch (e) {
+      console.error("Matched tweet photo failed, using city photo:", e);
+    }
+    if (!photo) photo = await findDestinationPhoto(row.destination || "");
     if (photo?.url) {
       const credit = `\n${photo.credit}`;
       mediaIds = [await uploadImageFromUrl(photo.url)];
       // Credit the photographer when it fits (Pixabay/Pexels don't strictly require it)
       if ([...(text + credit)].length <= (long ? 600 : 280)) text = text + credit;
-      photoNote = `${photo.credit} (${photo.sourceUrl})`;
+      photoNote = `${photo.matched ? `matched "${photo.matched}"` : "city photo"}: ${photo.credit} (${photo.sourceUrl})`;
+      console.log("TWEET_PHOTO", photoNote);
     }
   } catch (e) {
     console.error("Photo step failed, posting text only:", e);
