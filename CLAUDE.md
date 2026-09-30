@@ -65,7 +65,9 @@ Estimated spend per month is tracked in `social_state` key `spend:YYYY-MM`.
 
 ## Email style (for Gmail Primary tab)
 - Emails look like a personal note from Ryan: plain text + minimal HTML, no buttons/colored boxes, links
-  written out, signed "Ryan / Destinations Daily", plain-text version included, List-Unsubscribe header.
+  written out, signed "Ryan", plain-text version included, rotating conversational subject lines. No
+  List-Unsubscribe header (removed 2026-09-30 as a Primary-tab experiment; add back if sending to 5,000+ Gmail
+  users/day, which Gmail requires). Visible unsubscribe link always stays (legal requirement).
 - Confirmation email and tip #1 ask the reader to reply and to drag the email to Primary (replies are a
   strong "real contact" signal). Nothing guarantees Primary; Gmail decides per person.
 
