@@ -47,9 +47,14 @@ export default function SignupForm({ initialTrip = null }) {
           <input type="date" name="endDate" min={tomorrow} defaultValue={initialTrip?.endDate} />
         </label>
       </div>
-      <label>Your email
-        <input type="email" name="email" placeholder="you@example.com" required />
-      </label>
+      <div className="row">
+        <label>First name (optional)
+          <input name="firstName" placeholder="Alex" maxLength={40} autoComplete="given-name" />
+        </label>
+        <label>Your email
+          <input type="email" name="email" placeholder="you@example.com" required autoComplete="email" />
+        </label>
+      </div>
       {state.status === "error" && <p className="error" role="alert">{state.message}</p>}
       <button disabled={state.status === "loading"}>
         {state.status === "loading" ? "Signing you up..." : "Start my daily tips"}

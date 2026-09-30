@@ -5,6 +5,7 @@ import { getSetting } from "@/lib/settings";
 import { getContent } from "@/lib/content";
 import { getEmailPhoto } from "@/lib/emailPhotos";
 import { sendDaily } from "@/lib/email";
+import { firstNameFor } from "@/lib/names";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
@@ -29,7 +30,8 @@ export async function GET(req) {
     for (const email of to) {
       await sendDaily({
         email, destination, token: "00000000-0000-0000-0000-000000000000", daysLeft: 62, tipNumber: 3,
-        tip, fact, startDate: new Date(Date.now() + 62 * 86400000).toISOString().slice(0, 10), endDate: "", subjectPrefix: "[TEST] ", personalLine: true, photo,
+        tip, fact, startDate: new Date(Date.now() + 62 * 86400000).toISOString().slice(0, 10), endDate: "", subjectPrefix: "[TEST] ", personalLine: true,
+        photo: params.get("photo") === "0" ? null : photo, firstName: firstNameFor({ email }),
       });
     }
     return NextResponse.json({ sent: to.length, tip, fact, photo, debug });

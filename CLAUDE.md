@@ -70,6 +70,11 @@ Estimated spend per month is tracked in `social_state` key `spend:YYYY-MM`.
   written out, signed "Ryan", plain-text version included, rotating conversational subject lines. No
   List-Unsubscribe header (removed 2026-09-30 as a Primary-tab experiment; add back if sending to 5,000+ Gmail
   users/day, which Gmail requires). Visible unsubscribe link always stays (legal requirement).
+- Greeting uses the subscriber's first name ("Hey Tori!"): `subscribers.first_name` from the optional signup
+  field, else a guess from a clearly "first.last"/"first_last" email (`lib/names.js`), else just "Hey!".
+  Never guess from run-together addresses like "johnsboehme"; a wrong name is worse than none.
+- Photos in emails were tested 2026-09-30: even a small photo sent a fresh inbox (Tori) to Promotions, so
+  `setting:email_photos` stays OFF. Photo matching code is reused for social posts.
 - Confirmation email and tip #1 ask the reader to reply and to drag the email to Primary (replies are a
   strong "real contact" signal). Nothing guarantees Primary; Gmail decides per person.
 

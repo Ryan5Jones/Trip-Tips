@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { sendConfirmation } from "@/lib/email";
+import { cleanFirstName, firstNameFor } from "@/lib/names";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function POST(req) {
   const body = await req.json().catch(() => ({}));
-  const { email, destination, startDate, endDate, website } = body;
+  const { email, destination, startDate, endDate, website, firstName } = body;
 
   if (website) return NextResponse.json({ ok: true }); // honeypot: bots fill this in
 
@@ -23,16 +24,23 @@ export async function POST(req) {
   const { data, error } = await db
     .from("subscribers")
     .upsert(
-      { email: cleanEmail, destination: cleanDest, start_date: startDate, end_date: endDate || null },
+      {
+        email: cleanEmail, destination: cleanDest, start_date: startDate, end_date: endDate || null,
+        // Only set a name when one was typed, so a blank re-signup never erases it
+        ...(cleanFirstName(firstName) ? { first_name: cleanFirstName(firstName) } : {}),
+      },
       { onConflict: "email,destination,start_date" }
     )
-    .select("token, confirmed")
+    .select("token, confirmed, first_name")
     .single();
 
   if (error) return NextResponse.json({ error: "Something went wrong. Try again." }, { status: 500 });
 
   if (!data.confirmed) {
-    await sendConfirmation({ email: cleanEmail, destination: cleanDest, token: data.token });
+    await sendConfirmation({
+      email: cleanEmail, destination: cleanDest, token: data.token,
+      firstName: firstNameFor({ first_name: data.first_name, email: cleanEmail }),
+    });
   }
   return NextResponse.json({ ok: true });
 }

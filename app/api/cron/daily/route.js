@@ -6,6 +6,7 @@ import { getSetting } from "@/lib/settings";
 import { checkMilestones } from "@/lib/milestones";
 import { getEmailPhoto } from "@/lib/emailPhotos";
 import { THEMES } from "@/lib/content";
+import { firstNameFor } from "@/lib/names";
 
 export const maxDuration = 300;
 
@@ -47,6 +48,7 @@ export async function GET(req) {
       const resendEmailId = await sendDaily({
         email: s.email, destination: s.destination, token: s.token, daysLeft, tipNumber, tip, fact,
         startDate: s.start_date, endDate: s.end_date, personalLine, photo,
+        firstName: firstNameFor(s),
       });
       // Record the send so opens/clicks can be matched to it (never blocks the email)
       if (resendEmailId) {
