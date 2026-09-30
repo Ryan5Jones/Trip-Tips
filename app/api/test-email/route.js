@@ -21,6 +21,7 @@ export async function GET(req) {
   try {
     const { tip, fact } = await getContent(destination, themeIndex);
     const photo = await getEmailPhoto(destination, themeIndex, tip, fact);
+    if (!photo) return NextResponse.json({ sent: 0, note: "no matching photo found", tip, fact });
     for (const email of to) {
       await sendDaily({
         email, destination, token: "00000000-0000-0000-0000-000000000000", daysLeft: 62, tipNumber: 3,
