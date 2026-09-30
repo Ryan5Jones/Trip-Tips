@@ -20,15 +20,16 @@ export async function GET(req) {
   const themeIndex = 1; // food and dining customs
   try {
     const { tip, fact } = await getContent(destination, themeIndex);
-    const photo = await getEmailPhoto(destination, themeIndex, tip, fact);
-    if (!photo) return NextResponse.json({ sent: 0, note: "no matching photo found", tip, fact });
+    const debug = [];
+    const photo = await getEmailPhoto(destination, themeIndex, tip, fact, debug);
+    if (!photo) return NextResponse.json({ sent: 0, note: "no matching photo found", tip, fact, debug });
     for (const email of to) {
       await sendDaily({
         email, destination, token: "00000000-0000-0000-0000-000000000000", daysLeft: 62, tipNumber: 3,
         tip, fact, startDate: new Date(Date.now() + 62 * 86400000).toISOString().slice(0, 10), endDate: "", subjectPrefix: "[TEST] ", personalLine: true, photo,
       });
     }
-    return NextResponse.json({ sent: to.length, tip, fact, photo });
+    return NextResponse.json({ sent: to.length, tip, fact, photo, debug });
   } catch (e) {
     return NextResponse.json({ error: String(e.message || e) }, { status: 500 });
   }
