@@ -46,7 +46,7 @@ export async function GET(req) {
       if (withPhotos) {
         photo = await getEmailPhoto(s.destination, s.emails_sent % THEMES.length, tip, fact).catch(() => null);
       }
-      const phrase = withPhrase ? await getDailyPhrase(s.destination, s.emails_sent).catch(() => null) : null;
+      const phrase = withPhrase ? await getDailyPhrase(s.destination, s.emails_sent, tip, fact).catch(() => null) : null;
       const daysLeft = Math.round((new Date(s.start_date) - new Date(today)) / 86400000);
       const tipNumber = s.emails_sent + 1;
       const resendEmailId = await sendDaily({

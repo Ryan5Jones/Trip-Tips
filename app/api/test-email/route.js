@@ -21,7 +21,7 @@ export async function GET(req) {
   const day = Number(params.get("day") || 0);
   try {
     const { tip, fact } = await getContent(destination, day);
-    const phrase = await getDailyPhrase(destination, day);
+    const phrase = await getDailyPhrase(destination, day, tip, fact);
     await sendDaily({
       email: to, destination, token: "00000000-0000-0000-0000-000000000000", daysLeft: 45 - day,
       tipNumber: day + 2, tip, fact, startDate: new Date(Date.now() + 45 * 86400000).toISOString().slice(0, 10),
