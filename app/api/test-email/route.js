@@ -10,18 +10,20 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 120;
 
 export async function GET(req) {
-  const token = new URL(req.url).searchParams.get("token");
+  const params = new URL(req.url).searchParams;
+  const token = params.get("token");
   const expected = await getSetting("diag_token", null);
   const to = String((await getSetting("test_email", "")) || "").split(",").map((x) => x.trim()).filter(Boolean);
   if (!expected || !token || token !== expected || !to.length) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const destination = "Tokyo, Japan";
-  const themeIndex = 1; // food and dining customs
+  const destination = params.get("dest") || "Tokyo, Japan";
+  const themeIndex = Number(params.get("theme") ?? 1);
   try {
     const { tip, fact } = await getContent(destination, themeIndex);
     const debug = [];
     const photo = await getEmailPhoto(destination, themeIndex, tip, fact, debug);
+    console.log("PHOTO_DEBUG", JSON.stringify({ destination, themeIndex, photo, debug }));
     if (!photo) return NextResponse.json({ sent: 0, note: "no matching photo found", tip, fact, debug });
     for (const email of to) {
       await sendDaily({
