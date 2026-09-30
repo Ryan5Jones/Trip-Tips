@@ -23,7 +23,7 @@ session (or person) can pick up where we left off. Last updated: 2026-09-29.
 | GitHub | Code: `Ryan5Jones/trip-tips` (branch `main`) | Pushing to `main` auto-deploys. |
 | Vercel | Hosts the live site + scheduled jobs | Live project is **trip-tips-k9df** (team "trip-tips"). An older project **trip-tips** is unused; Ryan may delete it. |
 | Supabase | Database | Project id `tqdxosdobidzucxmhsxl`. |
-| Resend | Sends the emails | Open tracking ON, click tracking OFF (turned off 2026-09-30 to help land in Gmail Primary). Tracking subdomain `email.destinationsdaily.com`. Webhook -> `/api/resend-webhook`. |
+| Resend | Sends the emails | Open tracking ON, click tracking OFF (never enabled; keep it off to help land in Gmail Primary). Tracking subdomain `email.destinationsdaily.com`. Webhook -> `/api/resend-webhook`. |
 | Anthropic API | Writes tips, facts and tweets | Model from `ANTHROPIC_MODEL` (default `claude-sonnet-5-5`). |
 | X API | Posting tweets | Pay-per-use, prepaid credits ($10 loaded 2026-09-29, auto-recharge off). |
 | Pixabay | Tweet photos | `PIXABAY_API_KEY`. Pexels also supported (`PEXELS_API_KEY`) but Pexels key issuance was paused. |
