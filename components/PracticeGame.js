@@ -48,7 +48,7 @@ function options(correct, pool, key) {
 
 // How a phrase can be assembled from tiles: whole words (2-7 words) or letters (3-12 characters)
 function buildPlan(p, pool) {
-  const words = p.phrase.trim().split(/\s+/);
+  const words = p.phrase.replace(/\s*\/\s*/g, " / ").trim().split(/\s+/);
   if (words.length >= 2 && words.length <= 7) {
     const have = new Set(words.map((w) => w.toLowerCase()));
     const extra = [
@@ -63,6 +63,12 @@ function buildPlan(p, pool) {
   if (chars.length >= 3 && chars.length <= 12) return { mode: "letters", parts: chars, extra: [] };
   return null;
 }
+
+// "obrigado / obrigada" style answers: the alternatives can be given in either order
+const sameAnswer = (built, target) => {
+  const norm = (t) => t.toLowerCase().split("/").map((x) => x.trim()).filter(Boolean).sort().join("|");
+  return built.toLowerCase() === target.toLowerCase() || norm(built) === norm(target);
+};
 
 function buildRound(phrases) {
   const newest = phrases[phrases.length - 1];
@@ -151,7 +157,7 @@ function Build({ q, result, onCheck }) {
   const [placed, setPlaced] = useState([]);
   const byId = (id) => tiles.find((t) => t.id === id);
   const built = placed.map((id) => byId(id).text).join(sep);
-  const right = built.toLowerCase() === q.plan.parts.join(sep).toLowerCase();
+  const right = sameAnswer(built, q.plan.parts.join(sep));
   const locked = Boolean(result);
 
   return (
