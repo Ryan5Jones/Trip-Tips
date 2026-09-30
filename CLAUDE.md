@@ -27,7 +27,7 @@ session (or person) can pick up where we left off. Last updated: 2026-09-29.
 | Anthropic API | Writes tips, facts and tweets | Model from `ANTHROPIC_MODEL` (default `claude-sonnet-5-5`). |
 | X API | Posting tweets | Pay-per-use, prepaid credits ($10 loaded 2026-09-29, auto-recharge off). |
 | Pixabay | Tweet photos | `PIXABAY_API_KEY`. Pexels also supported (`PEXELS_API_KEY`) but Pexels key issuance was paused. |
-| Google Workspace | Company email (Gmail) on destinationsdaily.com | Aliases like support@ can be added in Admin console. |
+| Google Workspace | Company email (Gmail) on destinationsdaily.com | Emails are sent From `tips@destinationsdaily.com` (EMAIL_FROM); `tips@` is an alias of Ryan's Workspace user, so subscriber replies land in his Gmail (set up + tested 2026-09-30). More aliases: Admin console -> Directory -> Users -> Ryan -> Alternate email addresses. |
 
 ## Environment variables (in Vercel, project trip-tips-k9df), names only
 `NEXT_PUBLIC_SITE_URL` (must include `https://`), `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
@@ -108,12 +108,7 @@ lonelyplanet, CNTraveler, TravelLeisure, NatGeoTravel), `social_posts` (reply/qu
   don't always show up in log searches; check Supabase (last_sent_on, tweets, stats_updated_at) to confirm.
 
 ## Open items / ideas
-- **Email alias for the daily emails (to do):** create an alias in Google Workspace (Admin console ->
-  Directory -> Users -> Ryan's user -> Alternate email addresses), e.g. `tips@` or `hello@destinationsdaily.com`
-  (Ryan to pick the name). Then set Vercel env var `EMAIL_FROM` to `Destinations Daily <alias@destinationsdaily.com>`
-  and redeploy. Resend can send from any address on the verified domain; replies land in Ryan's Gmail via the
-  alias. Test with a +alias signup afterwards.
-- **Replies shape each subscriber's tips (to do; needs the email alias first):** receive replies at our site
+- **Replies shape each subscriber's tips (to do):** receive replies at our site
   (e.g. Resend inbound email or Google forwarding to a webhook), save them to Supabase linked to the
   subscriber, have AI extract preferences ("traveling with kids", "foodie", "first time", "budget"), and feed
   those into their future tip/fact generation (per-subscriber content instead of the shared cache for those
