@@ -7,7 +7,7 @@ import { checkMilestones } from "@/lib/milestones";
 import { getEmailPhoto } from "@/lib/emailPhotos";
 import { THEMES } from "@/lib/content";
 import { firstNameFor } from "@/lib/names";
-import { getDailyPhrase } from "@/lib/phrases";
+import { getDailyPhrase, ensurePhrases } from "@/lib/phrases";
 
 export const maxDuration = 300;
 
@@ -47,6 +47,8 @@ export async function GET(req) {
         photo = await getEmailPhoto(s.destination, s.emails_sent % THEMES.length, tip, fact).catch(() => null);
       }
       const phrase = withPhrase ? await getDailyPhrase(s.destination, s.emails_sent, tip, fact).catch(() => null) : null;
+      // Starter pack for the practice game: phrases 0..2 (or up to today's) must exist
+      if (phrase) await ensurePhrases(s.destination, Math.max(2, s.emails_sent)).catch(() => null);
       const daysLeft = Math.round((new Date(s.start_date) - new Date(today)) / 86400000);
       const tipNumber = s.emails_sent + 1;
       const resendEmailId = await sendDaily({

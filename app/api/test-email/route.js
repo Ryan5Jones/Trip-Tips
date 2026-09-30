@@ -3,7 +3,7 @@
 import { NextResponse } from "next/server";
 import { getSetting } from "@/lib/settings";
 import { getContent } from "@/lib/content";
-import { getDailyPhrase } from "@/lib/phrases";
+import { getDailyPhrase, ensurePhrases } from "@/lib/phrases";
 import { sendDaily } from "@/lib/email";
 import { firstNameFor } from "@/lib/names";
 
@@ -18,6 +18,11 @@ export async function GET(req) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const destination = params.get("dest") || "Paris, France";
+  // ?ensure=N: only generate phrases 0..N for this destination (no email), for testing the game
+  if (params.get("ensure")) {
+    const ok = await ensurePhrases(destination, Number(params.get("ensure")), 5);
+    return NextResponse.json({ ensured: ok, destination });
+  }
   const day = Number(params.get("day") || 0);
   try {
     const { tip, fact } = await getContent(destination, day);
