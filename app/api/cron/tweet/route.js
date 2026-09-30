@@ -1,0 +1,82 @@
+// Daily tweet. Runs on the schedule in vercel.json.
+//
+// Preview mode (default): writes today's tweet and saves it to the `tweets` table
+// WITHOUT posting. Set TWEETS_ENABLED=true in Vercel to actually post.
+//
+// Manual preview in a browser:
+//   https://www.destinationsdaily.com/api/cron/tweet?secret=YOUR_CRON_SECRET
+//   add &regenerate=1 to get a different draft (preview mode only)
+import { NextResponse } from "next/server";
+import { db } from "@/lib/db";
+import { tweetTopicFor, writeTweet } from "@/lib/tweets";
+import { postTweet, xConfigured } from "@/lib/twitter";
+
+export const maxDuration = 60;
+
+export async function GET(req) {
+  const url = new URL(req.url);
+  const secret = process.env.CRON_SECRET;
+  const authorized =
+    secret &&
+    (req.headers.get("authorization") === `Bearer ${secret}` || url.searchParams.get("secret") === secret);
+  if (!authorized) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const enabled = process.env.TWEETS_ENABLED === "true";
+  const regenerate = url.searchParams.get("regenerate") === "1" && !enabled;
+  const today = new Date().toISOString().slice(0, 10);
+
+  const { data: existing, error: readError } = await db
+    .from("tweets").select("*").eq("tweet_date", today).maybeSingle();
+  if (readError) return NextResponse.json({ error: readError.message }, { status: 500 });
+
+  // Already posted today: never post twice
+  if (existing?.status === "posted") {
+    return NextResponse.json({ mode: "already_posted", text: existing.text, tweet_id: existing.tweet_id });
+  }
+
+  // Reuse today's draft (so what you previewed is what posts), unless asked for a new one
+  let row = existing;
+  if (!row || regenerate) {
+    const topic = tweetTopicFor(today);
+    try {
+      const text = await writeTweet(topic);
+      const { data, error } = await db
+        .from("tweets")
+        .upsert(
+          { tweet_date: today, destination: topic.destination, theme: topic.theme, text, status: "preview", error: null },
+          { onConflict: "tweet_date" }
+        )
+        .select()
+        .single();
+      if (error) throw new Error(error.message);
+      row = data;
+    } catch (e) {
+      console.error("Tweet generation failed:", e);
+      return NextResponse.json({ error: String(e.message || e) }, { status: 500 });
+    }
+  }
+
+  if (!enabled) {
+    return NextResponse.json({
+      mode: "preview (not posted; set TWEETS_ENABLED=true in Vercel to post)",
+      destination: row.destination,
+      characters: [...row.text].length,
+      text: row.text,
+    });
+  }
+
+  if (!xConfigured()) {
+    return NextResponse.json({ error: "X keys missing in Vercel environment variables" }, { status: 500 });
+  }
+
+  try {
+    const tweetId = await postTweet(row.text);
+    await db.from("tweets").update({ status: "posted", tweet_id: tweetId, posted_at: new Date().toISOString(), error: null })
+      .eq("tweet_date", today);
+    return NextResponse.json({ mode: "posted", tweet_id: tweetId, text: row.text });
+  } catch (e) {
+    console.error("Posting tweet failed:", e);
+    await db.from("tweets").update({ status: "failed", error: String(e.message || e).slice(0, 500) }).eq("tweet_date", today);
+    return NextResponse.json({ error: String(e.message || e) }, { status: 500 });
+  }
+}
