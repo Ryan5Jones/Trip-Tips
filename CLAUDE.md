@@ -91,3 +91,11 @@ lonelyplanet, CNTraveler, TravelLeisure, NatGeoTravel), `social_posts` (reply/qu
 - Replies and quote tweets are in preview; Ryan to review drafts before switching `social_mode` to "auto".
 - Consider marking the X_* env vars as Sensitive in Vercel.
 - Google Workspace: finish DKIM and add aliases (support@, etc.).
+- **Instagram automation (to do):** 1 photo post/day with a snappy, funny caption (tip + fun fact, hook
+  first, "link in bio", 3-5 hashtags), stats saved to Supabase, preview mode first. Instagram's API is free;
+  only cost is the AI caption (~1-2 cents/post). No quote/comment on other accounts (API doesn't allow it).
+  Ryan's setup steps: (1) switch Instagram to a Professional account, (2) create a Meta developer app and
+  connect Instagram ("Instagram API with Instagram Login", permission instagram_business_content_publish),
+  (3) add the access token to Vercel. Build auto-refresh for the 60-day token. Images must be JPEG at a public
+  URL, so serve Pixabay photos through our own domain (Pixabay doesn't allow hotlinking). Ask Ryan for his
+  Instagram handle.
