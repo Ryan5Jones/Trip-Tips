@@ -52,8 +52,8 @@ Change these with SQL; no redeploy needed. Env vars of the same meaning are fall
 Estimated spend per month is tracked in `social_state` key `spend:YYYY-MM`.
 
 ## Tweet style (Ryan's preferences)
-- Snappy, with a hook first, light humor, one emoji, one hashtag (#TravelTips on daily tweets; a
-  destination hashtag on quote tweets). Humor is about the traveler's experience, never mocking a place,
+- Snappy, with a hook first, light humor, one emoji, and exactly one hashtag: the destination's name
+  (e.g. #NewOrleans, #Tokyo) on daily tweets and quote tweets. Hashtags barely affect reach on X now; never use 3+. Humor is about the traveler's experience, never mocking a place,
   its people or culture.
 - Always a "link in bio" nudge (vary the wording). No links in tweets (links cost $0.20 per post vs $0.015).
 - Short enough to never show "Show more" (under ~280 characters including the photo credit line).
