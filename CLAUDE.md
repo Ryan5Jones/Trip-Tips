@@ -86,6 +86,9 @@ lonelyplanet, CNTraveler, TravelLeisure, NatGeoTravel), `social_posts` (reply/qu
 - X API only allows automated replies when the author @mentions or quotes us (since Feb 2026).
 - Emails landed in spam at first on the new Google Workspace inbox; DKIM for Google was suggested.
 - `NEXT_PUBLIC_SITE_URL` without `https://` broke the confirm redirect (500) and email links.
+- Vercel is on the free Hobby plan: each cron runs once a day, anytime within its scheduled hour (e.g. the
+  15:00 UTC email job runs 8:00-8:59 AM Pacific). Pro (~$20/mo) gives per-minute precision. Cron requests
+  don't always show up in log searches; check Supabase (last_sent_on, tweets, stats_updated_at) to confirm.
 
 ## Open items / ideas
 - **Email alias for the daily emails (to do):** create an alias in Google Workspace (Admin console ->
