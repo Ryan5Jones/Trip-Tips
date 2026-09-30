@@ -88,9 +88,6 @@ lonelyplanet, CNTraveler, TravelLeisure, NatGeoTravel), `social_posts` (reply/qu
 - `NEXT_PUBLIC_SITE_URL` without `https://` broke the confirm redirect (500) and email links.
 
 ## Open items / ideas
-- Replies and quote tweets are in preview; Ryan to review drafts before switching `social_mode` to "auto".
-- Consider marking the X_* env vars as Sensitive in Vercel.
-- Google Workspace: finish DKIM and add aliases (support@, etc.).
 - **Instagram automation (to do):** 1 photo post/day with a snappy, funny caption (tip + fun fact, hook
   first, "link in bio", 3-5 hashtags), stats saved to Supabase, preview mode first. Instagram's API is free;
   only cost is the AI caption (~1-2 cents/post). No quote/comment on other accounts (API doesn't allow it).
