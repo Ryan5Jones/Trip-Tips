@@ -52,6 +52,7 @@ Change these with SQL; no redeploy needed. Env vars of the same meaning are fall
 | `setting:quotes_per_day` | 3 | Max quote tweets per day (also max 1 per account per day) |
 | `setting:x_monthly_budget` | 5 | USD/month cap on estimated X API spend |
 | `setting:long_tweets` | false | Keep OFF: Ryan does not want posts long enough to trigger "Show more" |
+| `setting:email_photos` | (unset = off) | Daily emails include a photo matching the tip or fun fact (`lib/emailPhotos.js`: AI picks subject -> Pixabay search -> AI checks tags match -> copy hosted in Supabase storage bucket `email-photos`; cached in `content_cache.photo_*`). Turn on only if tests still land in Gmail Primary |
 | `setting:daily_personal_line` | true | Adds a rotating personal question ("Have you booked anything yet? Hit reply…") to daily emails from tip #2 on |
 Estimated spend per month is tracked in `social_state` key `spend:YYYY-MM`.
 

@@ -4,6 +4,8 @@ import { getContent } from "@/lib/content";
 import { sendDaily } from "@/lib/email";
 import { getSetting } from "@/lib/settings";
 import { checkMilestones } from "@/lib/milestones";
+import { getEmailPhoto } from "@/lib/emailPhotos";
+import { THEMES } from "@/lib/content";
 
 export const maxDuration = 300;
 
@@ -28,17 +30,23 @@ export async function GET(req) {
 
   // Supabase switch "setting:daily_personal_line": add a personal question to every daily email
   const personalLine = String(await getSetting("daily_personal_line", "false")) === "true";
+  // Supabase switch "setting:email_photos": add a photo matching the tip or fun fact
+  const withPhotos = String(await getSetting("email_photos", "false")) === "true";
 
   let sent = 0;
   let failed = 0;
   for (const s of subs) {
     try {
       const { tip, fact } = await getContent(s.destination, s.emails_sent);
+      let photo = null;
+      if (withPhotos) {
+        photo = await getEmailPhoto(s.destination, s.emails_sent % THEMES.length, tip, fact).catch(() => null);
+      }
       const daysLeft = Math.round((new Date(s.start_date) - new Date(today)) / 86400000);
       const tipNumber = s.emails_sent + 1;
       const resendEmailId = await sendDaily({
         email: s.email, destination: s.destination, token: s.token, daysLeft, tipNumber, tip, fact,
-        startDate: s.start_date, endDate: s.end_date, personalLine,
+        startDate: s.start_date, endDate: s.end_date, personalLine, photo,
       });
       // Record the send so opens/clicks can be matched to it (never blocks the email)
       if (resendEmailId) {
