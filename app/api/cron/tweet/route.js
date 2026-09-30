@@ -2,7 +2,8 @@
 // The slot is worked out from the time of day (UTC), or forced with ?slot=morning / ?slot=evening.
 //
 // Preview mode (default): writes today's tweet and saves it to the `tweets` table
-// WITHOUT posting. Set TWEETS_ENABLED=true in Vercel to actually post.
+// WITHOUT posting. Turn on posting with the Supabase switch "setting:tweets_enabled" = true
+// (in the social_state table), or TWEETS_ENABLED=true in Vercel.
 //
 // Manual preview in a browser:
 //   https://www.destinationsdaily.com/api/cron/tweet?secret=YOUR_CRON_SECRET
@@ -12,6 +13,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { tweetTopicFor, writeTweet } from "@/lib/tweets";
 import { postTweet, xConfigured } from "@/lib/twitter";
+import { getSetting } from "@/lib/settings";
 
 export const maxDuration = 60;
 
@@ -23,7 +25,8 @@ export async function GET(req) {
     (req.headers.get("authorization") === `Bearer ${secret}` || url.searchParams.get("secret") === secret);
   if (!authorized) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const enabled = process.env.TWEETS_ENABLED === "true";
+  // Switch lives in Supabase (social_state key "setting:tweets_enabled"); env var is the fallback
+  const enabled = String(await getSetting("tweets_enabled", process.env.TWEETS_ENABLED)) === "true";
   const regenerate = url.searchParams.get("regenerate") === "1" && !enabled;
   const now = new Date();
   const today = now.toISOString().slice(0, 10);

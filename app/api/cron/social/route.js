@@ -10,6 +10,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { xConfigured, getMe, getMentions, getUserByUsername, getUserTweets, postTweet } from "@/lib/twitter";
 import { draftMentionReply, draftQuote } from "@/lib/social";
+import { getSetting } from "@/lib/settings";
 
 export const maxDuration = 120;
 
@@ -57,7 +58,8 @@ export async function GET(req) {
   if (!authorized) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (!xConfigured()) return NextResponse.json({ error: "X keys missing in Vercel environment variables" }, { status: 500 });
 
-  const auto = process.env.SOCIAL_MODE === "auto";
+  // Switches live in Supabase (social_state "setting:social_mode" / "setting:quotes_per_day"); env vars are fallbacks
+  const auto = (await getSetting("social_mode", process.env.SOCIAL_MODE)) === "auto";
   const summary = { mode: auto ? "auto" : "preview (drafts only)", replies: [], quotes: [], errors: [] };
 
   // ---------- 1) Reply to @mentions ----------
@@ -98,7 +100,7 @@ export async function GET(req) {
 
   // ---------- 2) Quote tweets of big travel accounts ----------
   try {
-    const perDay = Number(process.env.QUOTES_PER_DAY || 3);
+    const perDay = Number(await getSetting("quotes_per_day", process.env.QUOTES_PER_DAY || 3));
     const today = new Date().toISOString().slice(0, 10);
     const { count: quotedToday } = await db.from("social_posts")
       .select("id", { count: "exact", head: true })
