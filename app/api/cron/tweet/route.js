@@ -14,6 +14,7 @@ import { db } from "@/lib/db";
 import { tweetTopicFor, writeTweet } from "@/lib/tweets";
 import { postTweet, xConfigured } from "@/lib/twitter";
 import { getSetting } from "@/lib/settings";
+import { COST, canSpend, recordSpend } from "@/lib/budget";
 
 export const maxDuration = 60;
 
@@ -81,8 +82,13 @@ export async function GET(req) {
     return NextResponse.json({ error: "X keys missing in Vercel environment variables" }, { status: 500 });
   }
 
+  if (!(await canSpend(COST.post, { reserveForTweets: false }))) {
+    return NextResponse.json({ mode: "skipped: monthly X budget reached", text: row.text });
+  }
+
   try {
     const tweetId = await postTweet(row.text);
+    await recordSpend(COST.post);
     await db.from("tweets").update({ status: "posted", tweet_id: tweetId, posted_at: new Date().toISOString(), error: null })
       .eq("tweet_date", today).eq("slot", slot);
     return NextResponse.json({ mode: "posted", slot, tweet_id: tweetId, text: row.text });

@@ -11,6 +11,7 @@ import { db } from "@/lib/db";
 import { xConfigured, getMe, getMentions, getUserByUsername, getUserTweets, postTweet } from "@/lib/twitter";
 import { draftMentionReply, draftQuote } from "@/lib/social";
 import { getSetting } from "@/lib/settings";
+import { COST, canSpend, recordSpend } from "@/lib/budget";
 
 export const maxDuration = 120;
 
@@ -37,8 +38,14 @@ async function saveDraft(row) {
 
 async function publish(kind, sourceTweetId, text, auto) {
   if (!auto) return;
+  if (!(await canSpend(COST.post))) {
+    await db.from("social_posts").update({ status: "skipped_budget" })
+      .eq("kind", kind).eq("source_tweet_id", sourceTweetId);
+    return;
+  }
   try {
     const id = await postTweet(text, kind === "reply" ? { replyTo: sourceTweetId } : { quote: sourceTweetId });
+    await recordSpend(COST.post);
     await db.from("social_posts")
       .update({ status: "posted", posted_tweet_id: id, posted_at: new Date().toISOString() })
       .eq("kind", kind).eq("source_tweet_id", sourceTweetId);
@@ -67,11 +74,15 @@ export async function GET(req) {
     let me = await getState("me");
     if (!me) {
       me = await getMe();
+      await recordSpend(COST.ownedRead);
       await setState("me", me);
     }
     const initialized = await getState("mentions_initialized");
     const sinceId = await getState("mentions_since_id");
+    // Worst case a mentions check returns 20 posts
+    if (!(await canSpend(20 * COST.read))) throw new Error("monthly X budget reached; skipping mentions");
     const mentions = await getMentions(me.id, sinceId);
+    await recordSpend(mentions.length * COST.read);
 
     if (!initialized) {
       // First run: start from now, don't reply to old mentions
@@ -113,9 +124,16 @@ export async function GET(req) {
       try {
 
       // Look up the account's id once
+      // Worst case: 1 user lookup + 5 posts returned
+      if (!(await canSpend(6 * COST.read))) {
+        summary.errors.push("monthly X budget reached; skipping quote checks");
+        break;
+      }
+
       let userId = acct.user_id;
       if (!userId) {
         const u = await getUserByUsername(acct.username);
+        await recordSpend(COST.read);
         if (!u) continue;
         userId = u.id;
         await db.from("watched_accounts")
@@ -124,6 +142,7 @@ export async function GET(req) {
       }
 
       const tweets = await getUserTweets(userId, acct.last_seen_id);
+      await recordSpend(tweets.length * COST.read);
       if (tweets[0]) {
         await db.from("watched_accounts").update({ last_seen_id: tweets[0].id }).eq("username", acct.username);
       }
