@@ -111,6 +111,11 @@ lonelyplanet, CNTraveler, TravelLeisure, NatGeoTravel), `social_posts` (reply/qu
   those into their future tip/fact generation (per-subscriber content instead of the shared cache for those
   people). Once live, the reply prompt can honestly say "so I can tailor your future tips". Current wording is
   "Hit reply and let me know. It helps me make these tips better." (true today).
+- **SMS option at signup (parked until 100 subscribers):** "Email me" or "Text me" choice; daily tip by text
+  via Twilio (~1 cent/text, ~$1.15/mo number, ~$2-10/mo + ~$20 one-time A2P 10DLC registration, 1-3 weeks
+  approval). Must have: consent checkbox, "Reply YES" confirmation, STOP/HELP, daytime-only sends. The daily
+  cron emails Ryan once when active subscribers reach 100 (`lib/milestones.js`, recipient =
+  `setting:owner_email`, sent flag = `social_state` key `milestone:100`).
 - **Instagram automation (to do):** 1 photo post/day with a snappy, funny caption (tip + fun fact, hook
   first, "link in bio", 3-5 hashtags), stats saved to Supabase, preview mode first. Instagram's API is free;
   only cost is the AI caption (~1-2 cents/post). No quote/comment on other accounts (API doesn't allow it).

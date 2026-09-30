@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { getContent } from "@/lib/content";
 import { sendDaily } from "@/lib/email";
 import { getSetting } from "@/lib/settings";
+import { checkMilestones } from "@/lib/milestones";
 
 export const maxDuration = 300;
 
@@ -60,5 +61,12 @@ export async function GET(req) {
       failed++;
     }
   }
+  // One-time reminder emails to Ryan at subscriber milestones (never blocks the daily send)
+  try {
+    await checkMilestones();
+  } catch (e) {
+    console.error("Milestone check failed:", e);
+  }
+
   return NextResponse.json({ sent, failed });
 }
