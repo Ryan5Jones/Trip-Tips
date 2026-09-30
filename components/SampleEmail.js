@@ -4,7 +4,7 @@ export default function SampleEmail() {
   return (
     <section className="sample" aria-labelledby="sample-title">
       <h2 id="sample-title">Here's what lands in your inbox</h2>
-      <p className="sample-sub">One short email each morning, like this one for a trip to Tokyo:</p>
+      <p className="sample-sub">One short email each morning, like this one for a trip to Lisbon:</p>
       <div className="mail" role="img" aria-label="Example daily email">
         <div className="mail-head">
           <div className="mail-row">
@@ -13,23 +13,24 @@ export default function SampleEmail() {
           </div>
           <div className="mail-row">
             <span className="mail-label">Subject</span>
-            <strong>Something to know about Tokyo</strong>
+            <strong>Something to know about Lisbon</strong>
           </div>
         </div>
         <div className="mail-body">
-          <p>Hey Alex! 45 days until Tokyo.</p>
+          <p>Hey Alex! 45 days until Lisbon.</p>
           <p>
-            Today&apos;s tip: don&apos;t tip. Seriously. Great service is the default in Japan, and leaving extra
-            cash might send your waiter jogging down the street to give it back. Instead, say
-            &ldquo;itadakimasu&rdquo; before you eat and &ldquo;gochisousama deshita&rdquo; (thanks for the meal)
-            on your way out. Instant local points.
+            Today&apos;s tip: learn three words before you land. &ldquo;Bom dia&rdquo; (good morning),
+            &ldquo;boa tarde&rdquo; (good afternoon), and &ldquo;obrigado&rdquo; for thank you, or
+            &ldquo;obrigada&rdquo; if you&apos;re a woman, since it matches the speaker, not the listener. Greet
+            staff first when you walk into a shop or caf&eacute;. It goes a long way, even if you switch to
+            English right after.
           </p>
           <p>
-            Fun fact: Japanese convenience stores, called konbini, are low-key food heaven. Their fluffy egg
-            sandwiches have fans who swear they&apos;re worth the flight. No pressure, but you have 45 days to
-            make room.
+            Fun fact: Portuguese is an official language in nine countries across four continents. Lisbon locals
+            are known for swallowing their vowels, so don&apos;t worry if it sounds nothing like the Portuguese
+            you&apos;ve heard before.
           </p>
-          <p>What&apos;s the one food you have to try in Tokyo? Hit reply and let me know. It helps me make these tips better.</p>
+          <p>What&apos;s on your Lisbon must-do list so far? Hit reply and let me know. It helps me make these tips better.</p>
           <p>Ryan</p>
         </div>
       </div>
