@@ -1,4 +1,5 @@
-// Daily tweet. Runs on the schedule in vercel.json.
+// Twice-daily tweet (morning + evening). Runs on the schedules in vercel.json.
+// The slot is worked out from the time of day (UTC), or forced with ?slot=morning / ?slot=evening.
 //
 // Preview mode (default): writes today's tweet and saves it to the `tweets` table
 // WITHOUT posting. Set TWEETS_ENABLED=true in Vercel to actually post.
@@ -6,6 +7,7 @@
 // Manual preview in a browser:
 //   https://www.destinationsdaily.com/api/cron/tweet?secret=YOUR_CRON_SECRET
 //   add &regenerate=1 to get a different draft (preview mode only)
+//   add &slot=evening to preview the evening tweet
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { tweetTopicFor, writeTweet } from "@/lib/tweets";
@@ -23,13 +25,19 @@ export async function GET(req) {
 
   const enabled = process.env.TWEETS_ENABLED === "true";
   const regenerate = url.searchParams.get("regenerate") === "1" && !enabled;
-  const today = new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const today = now.toISOString().slice(0, 10);
+  const requested = url.searchParams.get("slot");
+  // Morning cron runs ~16:00 UTC (9am Pacific); evening cron ~01:00 UTC (6pm Pacific)
+  const slot = requested === "morning" || requested === "evening"
+    ? requested
+    : now.getUTCHours() >= 12 ? "morning" : "evening";
 
   const { data: existing, error: readError } = await db
-    .from("tweets").select("*").eq("tweet_date", today).maybeSingle();
+    .from("tweets").select("*").eq("tweet_date", today).eq("slot", slot).maybeSingle();
   if (readError) return NextResponse.json({ error: readError.message }, { status: 500 });
 
-  // Already posted today: never post twice
+  // Already posted in this slot: never post twice
   if (existing?.status === "posted") {
     return NextResponse.json({ mode: "already_posted", text: existing.text, tweet_id: existing.tweet_id });
   }
@@ -37,14 +45,14 @@ export async function GET(req) {
   // Reuse today's draft (so what you previewed is what posts), unless asked for a new one
   let row = existing;
   if (!row || regenerate) {
-    const topic = tweetTopicFor(today);
+    const topic = tweetTopicFor(today, slot);
     try {
       const text = await writeTweet(topic);
       const { data, error } = await db
         .from("tweets")
         .upsert(
-          { tweet_date: today, destination: topic.destination, theme: topic.theme, text, status: "preview", error: null },
-          { onConflict: "tweet_date" }
+          { tweet_date: today, slot, destination: topic.destination, theme: topic.theme, text, status: "preview", error: null },
+          { onConflict: "tweet_date,slot" }
         )
         .select()
         .single();
@@ -59,6 +67,7 @@ export async function GET(req) {
   if (!enabled) {
     return NextResponse.json({
       mode: "preview (not posted; set TWEETS_ENABLED=true in Vercel to post)",
+      slot,
       destination: row.destination,
       characters: [...row.text].length,
       text: row.text,
@@ -72,11 +81,11 @@ export async function GET(req) {
   try {
     const tweetId = await postTweet(row.text);
     await db.from("tweets").update({ status: "posted", tweet_id: tweetId, posted_at: new Date().toISOString(), error: null })
-      .eq("tweet_date", today);
-    return NextResponse.json({ mode: "posted", tweet_id: tweetId, text: row.text });
+      .eq("tweet_date", today).eq("slot", slot);
+    return NextResponse.json({ mode: "posted", slot, tweet_id: tweetId, text: row.text });
   } catch (e) {
     console.error("Posting tweet failed:", e);
-    await db.from("tweets").update({ status: "failed", error: String(e.message || e).slice(0, 500) }).eq("tweet_date", today);
+    await db.from("tweets").update({ status: "failed", error: String(e.message || e).slice(0, 500) }).eq("tweet_date", today).eq("slot", slot);
     return NextResponse.json({ error: String(e.message || e) }, { status: 500 });
   }
 }
