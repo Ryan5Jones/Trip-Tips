@@ -97,11 +97,11 @@ export async function GET(req) {
   try {
     const photo = await findDestinationPhoto(row.destination || "");
     if (photo?.url) {
-      const credit = `\n📷 ${photo.photographer} / Pexels`;
+      const credit = `\n${photo.credit}`;
       if ([...(text + credit)].length <= (long ? 600 : 280)) {
         mediaIds = [await uploadImageFromUrl(photo.url)];
         text = text + credit;
-        photoNote = `photo by ${photo.photographer} (${photo.pexelsUrl})`;
+        photoNote = `${photo.credit} (${photo.sourceUrl})`;
       }
     }
   } catch (e) {
