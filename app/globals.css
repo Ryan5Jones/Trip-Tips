@@ -25,3 +25,17 @@ button:disabled { opacity:.6; cursor:wait; }
 .share-actions { display:flex; flex-wrap:wrap; gap:10px; }
 .share-btn-alt { background:#fff; color:var(--ink); border:1.5px solid var(--ink); }
 .share-btn-alt:hover { background:var(--paper); }
+.sample { margin-top:64px; }
+.sample h2 { font-size:1.6rem; letter-spacing:-0.02em; margin:0 0 6px; }
+.sample-sub { color:var(--muted); margin:0 0 18px; }
+.mail { background:#fff; border:1.5px solid var(--line); border-radius:10px; overflow:hidden; box-shadow:0 8px 24px rgba(15,46,46,.08); }
+.mail-head { padding:14px 18px; border-bottom:1px solid var(--line); background:#f8fbfa; font-size:.9rem; display:grid; gap:4px; }
+.mail-row { display:flex; gap:10px; flex-wrap:wrap; min-width:0; }
+.mail-row span:last-child, .mail-row strong { overflow-wrap:anywhere; }
+.mail-label { color:var(--muted); width:56px; flex-shrink:0; }
+.mail-body { padding:18px; font-family:Arial,sans-serif; font-size:15px; line-height:1.55; color:#222; }
+.mail-body p { margin:0 0 12px; }
+.mail-body p:last-child { margin:0; }
+.sample-cta { display:inline-block; margin-top:18px; font-weight:800; color:var(--ink); }
+#signup { scroll-margin-top:24px; }
+@media (max-width:520px) { .mail-label { width:auto; } .mail-body { padding:14px; } }

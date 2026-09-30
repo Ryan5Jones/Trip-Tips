@@ -14,6 +14,7 @@ session (or person) can pick up where we left off. Last updated: 2026-09-29.
 - **destinationsdaily.com**: people enter their email, destination and travel dates, confirm by email,
   then get one travel tip + fun fact per day until they leave. There's a "Share this trip" feature for
   friends/groups (link pre-fills the signup form; only destination + dates are shared, never email/token).
+  The homepage shows a static sample email (`components/SampleEmail.js`); keep it matching the real email style.
 - **X (Twitter) account** (display name "Destinations Daily", X Premium, blue check): automated tweets.
 
 ## Services and where things live
