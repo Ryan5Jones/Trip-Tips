@@ -38,6 +38,9 @@ session (or person) can pick up where we left off. Last updated: 2026-09-29.
 - `/api/cron/daily` 15:00: daily tip emails
 - `/api/cron/tweet` 16:00 (~9 AM Pacific, "morning") and 01:00 (~6 PM Pacific, "evening")
 - `/api/cron/social` 18:00, 22:00, 03:00: mention replies + quote tweets
+- `/api/cron/stats` 14:00 (~7 AM Pacific): saves views (impressions), likes, reposts, replies, quotes,
+  bookmarks and profile clicks for posts from the last 14 days into `tweets` / `social_posts`.
+  X reports impressions (times shown), not unique viewers.
 Manual test: Vercel -> trip-tips-k9df -> Settings -> Cron Jobs -> Run.
 
 ## On/off switches (Supabase table `social_state`, keys `setting:*`)
