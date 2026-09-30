@@ -69,6 +69,8 @@ Estimated spend per month is tracked in `social_state` key `spend:YYYY-MM`.
 - Destinations rotate through a list of 41 in `lib/tweets.js`; morning and evening use different places.
 
 ## Email style (for Gmail Primary tab)
+- Tip/fact voice (`lib/content.js`, since 2026-09-30): friendly, snappy, like a well-traveled friend, at most one
+  light touch of humor (never mocking a place/people), no emojis. Matches the homepage sample (Lisbon greetings).
 - Emails look like a personal note from Ryan: plain text + minimal HTML, no buttons/colored boxes, links
   written out, signed "Ryan", plain-text version included, rotating conversational subject lines. No
   List-Unsubscribe header (removed 2026-09-30 as a Primary-tab experiment; add back if sending to 5,000+ Gmail
