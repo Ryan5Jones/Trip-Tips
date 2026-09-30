@@ -4,9 +4,41 @@ import { useState } from "react";
 
 const MEDALS = ["🥇", "🥈", "🥉"];
 
-export default function Leaderboard({ board, inviteUrl, place }) {
+export default function Leaderboard({ board, inviteUrl, place, token, groupCode, onJoined }) {
   const [tab, setTab] = useState("week");
   const [copied, setCopied] = useState(false);
+  const [codeCopied, setCodeCopied] = useState(false);
+  const [entry, setEntry] = useState("");
+  const [join, setJoin] = useState({ busy: false, error: "" });
+
+  async function copyCode() {
+    try {
+      await navigator.clipboard.writeText(groupCode);
+      setCodeCopied(true);
+      setTimeout(() => setCodeCopied(false), 2000);
+    } catch {
+      window.prompt("Your friend code:", groupCode);
+    }
+  }
+
+  async function joinGroup(e) {
+    e.preventDefault();
+    setJoin({ busy: true, error: "" });
+    try {
+      const res = await fetch("/api/practice/join", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, code: entry }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { setJoin({ busy: false, error: data.error || "Something went wrong. Try again." }); return; }
+      setEntry("");
+      setJoin({ busy: false, error: "" });
+      onJoined?.(data);
+    } catch {
+      setJoin({ busy: false, error: "Couldn't connect. Try again." });
+    }
+  }
 
   async function invite() {
     const text = `Let's learn a few phrases before our ${place} trip. Play Passport Quest and compete with me:`;
@@ -53,6 +85,32 @@ export default function Leaderboard({ board, inviteUrl, place }) {
         </>
       )}
       <button type="button" className="pg-secondary" onClick={invite}>{copied ? "Link copied!" : "Invite a friend"}</button>
+      {groupCode && (
+        <div className="pg-code">
+          <span className="pg-fine">Your friend code (friends can paste it to join you):</span>
+          <span className="pg-code-row">
+            <code>{groupCode.toUpperCase()}</code>
+            <button type="button" className="pg-mini" onClick={copyCode}>{codeCopied ? "Copied!" : "Copy"}</button>
+          </span>
+        </div>
+      )}
+      {solo && token && (
+        <form className="pg-join" onSubmit={joinGroup}>
+          <label>
+            Have a friend&apos;s code?
+            <input
+              value={entry}
+              onChange={(e) => setEntry(e.target.value)}
+              placeholder="Paste it here"
+              maxLength={20}
+              autoCapitalize="characters"
+              autoComplete="off"
+            />
+          </label>
+          {join.error && <p className="error" role="alert">{join.error}</p>}
+          <button type="submit" disabled={join.busy || entry.trim().length < 6}>{join.busy ? "Joining..." : "Join their group"}</button>
+        </form>
+      )}
     </div>
   );
 }

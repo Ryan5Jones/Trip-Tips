@@ -154,3 +154,7 @@ button:disabled { opacity:.6; cursor:wait; }
 .pg-rows li.me { background:#fff7d6; font-weight:800; }
 .pg-pos { text-align:center; font-weight:800; }
 .pg-pts { font-weight:800; }
+.pg-code { display:grid; gap:4px; }
+.pg-code-row { display:flex; align-items:center; gap:10px; }
+.pg-code code { font-size:1.2rem; font-weight:800; letter-spacing:.08em; background:var(--paper); padding:6px 10px; border-radius:8px; }
+.pg-join { display:grid; gap:8px; border-top:1.5px solid var(--line); padding-top:12px; }

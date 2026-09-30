@@ -262,7 +262,7 @@ function MatchQuestion({ pairs, onDone }) {
   );
 }
 
-export default function PracticeGame({ token, place, destination, firstName, phrases, playedDays, board: initialBoard = [], inviteUrl = "" }) {
+export default function PracticeGame({ token, place, destination, firstName, phrases, playedDays, board: initialBoard = [], inviteUrl: initialInvite = "", groupCode: initialGroup = "" }) {
   const language = phrases[0]?.language || "local";
   const newest = phrases[phrases.length - 1];
   const rank = rankFor(phrases.length);
@@ -281,6 +281,13 @@ export default function PracticeGame({ token, place, destination, firstName, phr
   const [streak, setStreak] = useState(() => streakFrom(playedDays, localToday()));
   const [copied, setCopied] = useState(false);
   const [board, setBoard] = useState(initialBoard);
+  const [inviteUrl, setInviteUrl] = useState(initialInvite);
+  const [groupCode, setGroupCode] = useState(initialGroup);
+  const joined = (d) => {
+    if (Array.isArray(d.board)) setBoard(d.board);
+    if (d.inviteUrl) setInviteUrl(d.inviteUrl);
+    if (d.groupCode) setGroupCode(d.groupCode);
+  };
   const timeRef = useRef(1);
   const resolvedRef = useRef(false);
 
@@ -415,7 +422,7 @@ export default function PracticeGame({ token, place, destination, firstName, phr
           <p className="pg-meaning">&ldquo;{newest.meaning}&rdquo;</p>
         </div>
         <button type="button" className="pg-go" onClick={start}>Start quest</button>
-        {inviteUrl && <Leaderboard board={board} inviteUrl={inviteUrl} place={place} />}
+        {inviteUrl && <Leaderboard board={board} inviteUrl={inviteUrl} place={place} token={token} groupCode={groupCode} onJoined={joined} />}
       </div>
     );
   }
@@ -442,7 +449,7 @@ export default function PracticeGame({ token, place, destination, firstName, phr
           <span className="pg-stamp-bot">{stampDate}</span>
         </div>
         <p className="pg-streak">🔥 {Math.max(streak, 1)}-day streak</p>
-        {inviteUrl && <Leaderboard board={board} inviteUrl={inviteUrl} place={place} />}
+        {inviteUrl && <Leaderboard board={board} inviteUrl={inviteUrl} place={place} token={token} groupCode={groupCode} onJoined={joined} />}
         <LanguageGlobe
           destination={destination}
           langCode={newest.lang_code}

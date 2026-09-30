@@ -76,6 +76,7 @@ export default async function PracticePage({ params }) {
         destination={sub.destination}
         board={board}
         inviteUrl={inviteUrl}
+        groupCode={sub.group_code || sub.share_code}
         firstName={firstNameFor(sub)}
         phrases={phrases}
         playedDays={(days || []).map((d) => d.day)}
