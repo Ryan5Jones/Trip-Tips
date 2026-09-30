@@ -98,11 +98,10 @@ export async function GET(req) {
     const photo = await findDestinationPhoto(row.destination || "");
     if (photo?.url) {
       const credit = `\n${photo.credit}`;
-      if ([...(text + credit)].length <= (long ? 600 : 280)) {
-        mediaIds = [await uploadImageFromUrl(photo.url)];
-        text = text + credit;
-        photoNote = `${photo.credit} (${photo.sourceUrl})`;
-      }
+      mediaIds = [await uploadImageFromUrl(photo.url)];
+      // Credit the photographer when it fits (Pixabay/Pexels don't strictly require it)
+      if ([...(text + credit)].length <= (long ? 600 : 280)) text = text + credit;
+      photoNote = `${photo.credit} (${photo.sourceUrl})`;
     }
   } catch (e) {
     console.error("Photo step failed, posting text only:", e);
