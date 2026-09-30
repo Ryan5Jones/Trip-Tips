@@ -5,6 +5,7 @@ import ShareTrip from "@/components/ShareTrip";
 export default function SignupForm({ initialTrip = null }) {
   const [state, setState] = useState({ status: "idle", message: "" });
   const [trip, setTrip] = useState(null);
+  const group = initialTrip?.group || "";
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -14,11 +15,11 @@ export default function SignupForm({ initialTrip = null }) {
     const res = await fetch("/api/subscribe", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(submitted),
+      body: JSON.stringify({ ...submitted, group }),
     });
     const data = await res.json().catch(() => ({}));
     if (res.ok) {
-      setTrip({ destination: submitted.destination, startDate: submitted.startDate, endDate: submitted.endDate });
+      setTrip({ destination: submitted.destination, startDate: submitted.startDate, endDate: submitted.endDate, group: data.group || "" });
       setState({ status: "done", message: "" });
     }
     else setState({ status: "error", message: data.error || "Something went wrong." });

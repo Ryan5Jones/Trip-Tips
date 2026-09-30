@@ -7,6 +7,7 @@
 import { useEffect, useRef, useState } from "react";
 import { streakFrom } from "@/lib/streak";
 import LanguageGlobe from "@/components/LanguageGlobe";
+import Leaderboard from "@/components/Leaderboard";
 
 const shuffle = (arr) => {
   const a = [...arr];
@@ -261,7 +262,7 @@ function MatchQuestion({ pairs, onDone }) {
   );
 }
 
-export default function PracticeGame({ token, place, destination, firstName, phrases, playedDays }) {
+export default function PracticeGame({ token, place, destination, firstName, phrases, playedDays, board: initialBoard = [], inviteUrl = "" }) {
   const language = phrases[0]?.language || "local";
   const newest = phrases[phrases.length - 1];
   const rank = rankFor(phrases.length);
@@ -279,6 +280,7 @@ export default function PracticeGame({ token, place, destination, firstName, phr
   const [timeLeft, setTimeLeft] = useState(1); // fraction 0..1
   const [streak, setStreak] = useState(() => streakFrom(playedDays, localToday()));
   const [copied, setCopied] = useState(false);
+  const [board, setBoard] = useState(initialBoard);
   const timeRef = useRef(1);
   const resolvedRef = useRef(false);
 
@@ -348,10 +350,13 @@ export default function PracticeGame({ token, place, destination, firstName, phr
       const res = await fetch("/api/practice/complete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, score: rightCount, total: qs.length, localDate: localToday() }),
+        body: JSON.stringify({ token, score: rightCount, total: qs.length, points, localDate: localToday() }),
       });
       const data = await res.json();
       if (typeof data.streak === "number") setStreak(data.streak);
+      // Refresh the leaderboard so this round's points show up
+      const lb = await fetch(`/api/practice/leaderboard?token=${token}`).then((r) => r.json());
+      if (Array.isArray(lb.board)) setBoard(lb.board);
     } catch {
       // Offline or blocked: the round still counts on screen
     }
@@ -410,6 +415,7 @@ export default function PracticeGame({ token, place, destination, firstName, phr
           <p className="pg-meaning">&ldquo;{newest.meaning}&rdquo;</p>
         </div>
         <button type="button" className="pg-go" onClick={start}>Start quest</button>
+        {inviteUrl && <Leaderboard board={board} inviteUrl={inviteUrl} place={place} />}
       </div>
     );
   }
@@ -436,6 +442,7 @@ export default function PracticeGame({ token, place, destination, firstName, phr
           <span className="pg-stamp-bot">{stampDate}</span>
         </div>
         <p className="pg-streak">🔥 {Math.max(streak, 1)}-day streak</p>
+        {inviteUrl && <Leaderboard board={board} inviteUrl={inviteUrl} place={place} />}
         <LanguageGlobe
           destination={destination}
           langCode={newest.lang_code}

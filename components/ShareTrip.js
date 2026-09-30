@@ -2,13 +2,14 @@
 import { useState } from "react";
 
 // "Share this trip" button: uses the phone's share sheet when available, otherwise copies the link.
-export default function ShareTrip({ destination, startDate, endDate }) {
+export default function ShareTrip({ destination, startDate, endDate, group = "" }) {
   const [copied, setCopied] = useState(false);
 
   function buildUrl() {
     const params = new URLSearchParams({ trip: destination, leave: startDate });
     if (endDate) params.set("return", endDate);
     params.set("via", "friend");
+    if (group) params.set("g", group);
     return `${window.location.origin}/?${params.toString()}`;
   }
 
@@ -44,7 +45,7 @@ export default function ShareTrip({ destination, startDate, endDate }) {
   return (
     <div className="share">
       <p className="share-title">Traveling with friends or a group?</p>
-      <p className="share-text">Send them this trip so they get the same daily tips for {destination}.</p>
+      <p className="share-text">Send them this trip so they get the same daily tips for {destination}, and you can all compete on the Passport Quest leaderboard.</p>
       <div className="share-actions">
         <button type="button" className="share-btn" onClick={onShare}>
           {copied ? "Link copied!" : "Share this trip"}

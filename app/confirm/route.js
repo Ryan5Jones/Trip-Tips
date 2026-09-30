@@ -11,14 +11,14 @@ export async function GET(req) {
     .from("subscribers")
     .update({ confirmed: true, unsubscribed: false })
     .eq("token", token)
-    .select("destination, start_date, end_date")
+    .select("destination, start_date, end_date, group_code, share_code")
     .maybeSingle();
 
   if (!data) return NextResponse.redirect(`${base}/?status=invalid`);
 
   // Include the trip so the page can show "Share this trip"
   try {
-    const share = new URL(tripShareUrl({ destination: data.destination, startDate: data.start_date, endDate: data.end_date, base }));
+    const share = new URL(tripShareUrl({ destination: data.destination, startDate: data.start_date, endDate: data.end_date, group: data.group_code || data.share_code, base }));
     share.searchParams.delete("via");
     share.searchParams.set("status", "confirmed");
     return NextResponse.redirect(share.toString());

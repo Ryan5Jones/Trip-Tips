@@ -4,6 +4,8 @@ import { db } from "@/lib/db";
 import { destinationKey } from "@/lib/content";
 import PracticeGame from "@/components/PracticeGame";
 import { firstNameFor } from "@/lib/names";
+import { getLeaderboard } from "@/lib/leaderboard";
+import { tripShareUrl } from "@/lib/share";
 
 export const dynamic = "force-dynamic";
 export const metadata = {
@@ -28,7 +30,7 @@ export default async function PracticePage({ params }) {
 
   const { data: sub } = await db
     .from("subscribers")
-    .select("id, email, first_name, destination, emails_sent")
+    .select("id, email, first_name, destination, start_date, end_date, emails_sent, group_code, share_code")
     .eq("token", token)
     .maybeSingle();
   if (!sub) return <Message>We couldn&apos;t find your trip. Try the link in your latest email.</Message>;
@@ -58,12 +60,22 @@ export default async function PracticePage({ params }) {
     .limit(60);
 
   const place = sub.destination.split(",")[0].trim();
+  const board = await getLeaderboard(sub).catch(() => []);
+  const inviteUrl = tripShareUrl({
+    destination: sub.destination,
+    startDate: sub.start_date,
+    endDate: sub.end_date,
+    group: sub.group_code || sub.share_code,
+    base: process.env.NEXT_PUBLIC_SITE_URL,
+  });
   return (
     <main className="wrap practice-wrap">
       <PracticeGame
         token={token}
         place={place}
         destination={sub.destination}
+        board={board}
+        inviteUrl={inviteUrl}
         firstName={firstNameFor(sub)}
         phrases={phrases}
         playedDays={(days || []).map((d) => d.day)}

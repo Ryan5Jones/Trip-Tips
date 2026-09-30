@@ -54,7 +54,7 @@ export async function GET(req) {
       const resendEmailId = await sendDaily({
         email: s.email, destination: s.destination, token: s.token, daysLeft, tipNumber, tip, fact,
         startDate: s.start_date, endDate: s.end_date, personalLine, photo,
-        firstName: firstNameFor(s), phrase,
+        firstName: firstNameFor(s), phrase, groupCode: s.group_code || s.share_code,
       });
       // Record the send so opens/clicks can be matched to it (never blocks the email)
       if (resendEmailId) {
