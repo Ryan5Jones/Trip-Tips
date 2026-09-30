@@ -17,17 +17,19 @@ export default function SampleEmail() {
           </div>
         </div>
         <div className="mail-body">
+          <p>Hey Alex! 45 days until Tokyo.</p>
           <p>
-            Hey Alex! 45 days until Tokyo. Here&apos;s today&apos;s tip: don&apos;t tip in Tokyo restaurants.
-            Good service is simply expected, and leaving cash on the table can cause confusion. Instead, say
-            &ldquo;itadakimasu&rdquo; before you eat and &ldquo;gochisousama deshita&rdquo; (thank you for the
-            meal) when you leave.
+            Today&apos;s tip: don&apos;t tip. Seriously. Great service is the default in Japan, and leaving extra
+            cash might send your waiter jogging down the street to give it back. Instead, say
+            &ldquo;itadakimasu&rdquo; before you eat and &ldquo;gochisousama deshita&rdquo; (thanks for the meal)
+            on your way out. Instant local points.
           </p>
           <p>
-            And a fun fact you can bust out at dinner: Japanese convenience stores, called konbini, are famous
-            for genuinely great food, like fluffy egg sandwiches (tamago sando) and onigiri rice balls.
+            Fun fact: Japanese convenience stores, called konbini, are low-key food heaven. Their fluffy egg
+            sandwiches have fans who swear they&apos;re worth the flight. No pressure, but you have 45 days to
+            make room.
           </p>
-          <p>What&apos;s the one food you have to try in Tokyo? Hit reply and let me know.</p>
+          <p>What&apos;s the one food you have to try in Tokyo? Hit reply and let me know. It helps me make these tips better.</p>
           <p>Ryan</p>
         </div>
       </div>
