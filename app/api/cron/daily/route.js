@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getContent } from "@/lib/content";
 import { sendDaily } from "@/lib/email";
+import { getSetting } from "@/lib/settings";
 
 export const maxDuration = 300;
 
@@ -24,6 +25,9 @@ export async function GET(req) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
+  // Supabase switch "setting:daily_personal_line": add a personal question to every daily email
+  const personalLine = String(await getSetting("daily_personal_line", "false")) === "true";
+
   let sent = 0;
   let failed = 0;
   for (const s of subs) {
@@ -33,7 +37,7 @@ export async function GET(req) {
       const tipNumber = s.emails_sent + 1;
       const resendEmailId = await sendDaily({
         email: s.email, destination: s.destination, token: s.token, daysLeft, tipNumber, tip, fact,
-        startDate: s.start_date, endDate: s.end_date,
+        startDate: s.start_date, endDate: s.end_date, personalLine,
       });
       // Record the send so opens/clicks can be matched to it (never blocks the email)
       if (resendEmailId) {
