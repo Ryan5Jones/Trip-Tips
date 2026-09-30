@@ -15,6 +15,8 @@ import { tweetTopicFor, writeTweet } from "@/lib/tweets";
 import { postTweet, xConfigured } from "@/lib/twitter";
 import { getSetting } from "@/lib/settings";
 import { COST, canSpend, recordSpend } from "@/lib/budget";
+import { findDestinationPhoto } from "@/lib/photos";
+import { uploadImageFromUrl } from "@/lib/twitter";
 
 export const maxDuration = 60;
 
@@ -86,12 +88,33 @@ export async function GET(req) {
     return NextResponse.json({ mode: "skipped: monthly X budget reached", text: row.text });
   }
 
+  // Try to attach a destination photo (Pexels). Any failure -> post text only.
+  let text = row.text;
+  let mediaIds;
+  let photoNote = "no photo";
   try {
-    const tweetId = await postTweet(row.text);
+    const photo = await findDestinationPhoto(row.destination || "");
+    if (photo?.url) {
+      const credit = `\n📷 ${photo.photographer} / Pexels`;
+      if ([...(text + credit)].length <= 280) {
+        mediaIds = [await uploadImageFromUrl(photo.url)];
+        text = text + credit;
+        photoNote = `photo by ${photo.photographer} (${photo.pexelsUrl})`;
+      }
+    }
+  } catch (e) {
+    console.error("Photo step failed, posting text only:", e);
+    photoNote = `photo failed: ${String(e.message || e).slice(0, 150)}`;
+    mediaIds = undefined;
+    text = row.text;
+  }
+
+  try {
+    const tweetId = await postTweet(text, { mediaIds });
     await recordSpend(COST.post);
     await db.from("tweets").update({ status: "posted", tweet_id: tweetId, posted_at: new Date().toISOString(), error: null })
       .eq("tweet_date", today).eq("slot", slot);
-    return NextResponse.json({ mode: "posted", slot, tweet_id: tweetId, text: row.text });
+    return NextResponse.json({ mode: "posted", slot, tweet_id: tweetId, text, photo: photoNote });
   } catch (e) {
     console.error("Posting tweet failed:", e);
     await db.from("tweets").update({ status: "failed", error: String(e.message || e).slice(0, 500) }).eq("tweet_date", today).eq("slot", slot);
