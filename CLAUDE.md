@@ -99,3 +99,10 @@ lonelyplanet, CNTraveler, TravelLeisure, NatGeoTravel), `social_posts` (reply/qu
   (3) add the access token to Vercel. Build auto-refresh for the 60-day token. Images must be JPEG at a public
   URL, so serve Pixabay photos through our own domain (Pixabay doesn't allow hotlinking). Ask Ryan for his
   Instagram handle.
+- **Facebook Page automation (to do, set up together with Instagram):** daily photo post to a Destinations
+  Daily Facebook *Page* (API can't post to personal profiles), with a clickable link to destinationsdaily.com
+  (free on Facebook). Stats (reach, reactions, comments, shares) saved to Supabase. Posting is free; only
+  the AI caption costs ~1-2 cents/post. Ryan's setup: create a Facebook Page, then use ONE Meta developer app
+  for both, via "Instagram API with Facebook Login" (connect the Instagram Professional account to the Page),
+  with permissions pages_manage_posts, pages_read_engagement, instagram_basic,
+  instagram_business_content_publish. One long-lived Page token covers both.
