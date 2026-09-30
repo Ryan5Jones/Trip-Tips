@@ -11,7 +11,7 @@
 //   add &slot=evening to preview the evening tweet
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { tweetTopicFor, writeTweet } from "@/lib/tweets";
+import { tweetTopicFor, writeTweet, shortenForX } from "@/lib/tweets";
 import { postTweet, xConfigured } from "@/lib/twitter";
 import { getSetting } from "@/lib/settings";
 import { COST, canSpend, recordSpend } from "@/lib/budget";
@@ -30,6 +30,8 @@ export async function GET(req) {
 
   // Switch lives in Supabase (social_state key "setting:tweets_enabled"); env var is the fallback
   const enabled = String(await getSetting("tweets_enabled", process.env.TWEETS_ENABLED)) === "true";
+  // X Premium allows longer posts (Supabase switch "setting:long_tweets")
+  const long = String(await getSetting("long_tweets", "false")) === "true";
   const regenerate = url.searchParams.get("regenerate") === "1" && !enabled;
   const now = new Date();
   const today = now.toISOString().slice(0, 10);
@@ -53,7 +55,7 @@ export async function GET(req) {
   if (!row || regenerate) {
     const topic = tweetTopicFor(today, slot);
     try {
-      const text = await writeTweet(topic);
+      const text = await writeTweet(topic, { long });
       const { data, error } = await db
         .from("tweets")
         .upsert(
@@ -96,7 +98,7 @@ export async function GET(req) {
     const photo = await findDestinationPhoto(row.destination || "");
     if (photo?.url) {
       const credit = `\n📷 ${photo.photographer} / Pexels`;
-      if ([...(text + credit)].length <= 280) {
+      if ([...(text + credit)].length <= (long ? 600 : 280)) {
         mediaIds = [await uploadImageFromUrl(photo.url)];
         text = text + credit;
         photoNote = `photo by ${photo.photographer} (${photo.pexelsUrl})`;
@@ -110,7 +112,19 @@ export async function GET(req) {
   }
 
   try {
-    const tweetId = await postTweet(text, { mediaIds });
+    let tweetId;
+    try {
+      tweetId = await postTweet(text, { mediaIds });
+    } catch (e) {
+      // If X rejects a long post (e.g. Premium lapsed), retry once with a short version
+      if ([...text].length <= 280) throw e;
+      console.error("Long post rejected, retrying short:", e);
+      const credit = text.match(/\n📷 .+$/)?.[0] || "";
+      text = shortenForX(row.text);
+      if (credit && [...(text + credit)].length <= 280) text += credit;
+      else mediaIds = mediaIds && credit ? undefined : mediaIds;
+      tweetId = await postTweet(text, { mediaIds });
+    }
     await recordSpend(COST.post);
     await db.from("tweets").update({ status: "posted", tweet_id: tweetId, posted_at: new Date().toISOString(), error: null })
       .eq("tweet_date", today).eq("slot", slot);
