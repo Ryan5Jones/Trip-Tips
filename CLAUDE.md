@@ -105,6 +105,12 @@ lonelyplanet, CNTraveler, TravelLeisure, NatGeoTravel), `social_posts` (reply/qu
   (Ryan to pick the name). Then set Vercel env var `EMAIL_FROM` to `Destinations Daily <alias@destinationsdaily.com>`
   and redeploy. Resend can send from any address on the verified domain; replies land in Ryan's Gmail via the
   alias. Test with a +alias signup afterwards.
+- **Replies shape each subscriber's tips (to do; needs the email alias first):** receive replies at our site
+  (e.g. Resend inbound email or Google forwarding to a webhook), save them to Supabase linked to the
+  subscriber, have AI extract preferences ("traveling with kids", "foodie", "first time", "budget"), and feed
+  those into their future tip/fact generation (per-subscriber content instead of the shared cache for those
+  people). Once live, the reply prompt can honestly say "so I can tailor your future tips". Current wording is
+  "Hit reply and let me know. It helps me make these tips better." (true today).
 - **Instagram automation (to do):** 1 photo post/day with a snappy, funny caption (tip + fun fact, hook
   first, "link in bio", 3-5 hashtags), stats saved to Supabase, preview mode first. Instagram's API is free;
   only cost is the AI caption (~1-2 cents/post). No quote/comment on other accounts (API doesn't allow it).
