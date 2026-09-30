@@ -1,4 +1,4 @@
-// Phrase Practice: a 2-minute daily game using the phrases each subscriber has unlocked so far.
+// Passport Quest (phrase practice): a 2-minute daily game using the phrases each subscriber has unlocked so far.
 // Linked from the daily email. The token is the subscriber's private token (same as in unsubscribe links).
 import { db } from "@/lib/db";
 import { destinationKey } from "@/lib/content";
@@ -7,7 +7,7 @@ import { firstNameFor } from "@/lib/names";
 
 export const dynamic = "force-dynamic";
 export const metadata = {
-  title: "Phrase Practice · Destinations Daily",
+  title: "Passport Quest · Destinations Daily",
   robots: { index: false, follow: false },
 };
 
