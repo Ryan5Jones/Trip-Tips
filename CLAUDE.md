@@ -23,7 +23,7 @@ session (or person) can pick up where we left off. Last updated: 2026-09-29.
 | GitHub | Code: `Ryan5Jones/trip-tips` (branch `main`) | Pushing to `main` auto-deploys. |
 | Vercel | Hosts the live site + scheduled jobs | Live project is **trip-tips-k9df** (team "trip-tips"). An older project **trip-tips** is unused; Ryan may delete it. |
 | Supabase | Database | Project id `tqdxosdobidzucxmhsxl`. |
-| Resend | Sends the emails | Open/click tracking on, tracking subdomain `email.destinationsdaily.com`. Webhook -> `/api/resend-webhook`. |
+| Resend | Sends the emails | Open tracking ON, click tracking OFF (turned off 2026-09-30 to help land in Gmail Primary). Tracking subdomain `email.destinationsdaily.com`. Webhook -> `/api/resend-webhook`. |
 | Anthropic API | Writes tips, facts and tweets | Model from `ANTHROPIC_MODEL` (default `claude-sonnet-5-5`). |
 | X API | Posting tweets | Pay-per-use, prepaid credits ($10 loaded 2026-09-29, auto-recharge off). |
 | Pixabay | Tweet photos | `PIXABAY_API_KEY`. Pexels also supported (`PEXELS_API_KEY`) but Pexels key issuance was paused. |
@@ -31,7 +31,7 @@ session (or person) can pick up where we left off. Last updated: 2026-09-29.
 
 ## Environment variables (in Vercel, project trip-tips-k9df), names only
 `NEXT_PUBLIC_SITE_URL` (must include `https://`), `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
-`RESEND_API_KEY`, `EMAIL_FROM`, `MAILING_ADDRESS`, `RESEND_WEBHOOK_SECRET`, `ANTHROPIC_API_KEY`,
+`RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_REPLY_TO` (optional), `MAILING_ADDRESS`, `RESEND_WEBHOOK_SECRET`, `ANTHROPIC_API_KEY`,
 `CRON_SECRET`, `X_API_KEY`, `X_API_SECRET`, `X_ACCESS_TOKEN`, `X_ACCESS_TOKEN_SECRET`, `PIXABAY_API_KEY`.
 
 ## Scheduled jobs (vercel.json, times in UTC)
@@ -62,6 +62,12 @@ Estimated spend per month is tracked in `social_state` key `spend:YYYY-MM`.
 - Short enough to never show "Show more" (under ~280 characters including the photo credit line).
 - Daily tweets attach a destination photo with a credit line like "📷 name / Pixabay".
 - Destinations rotate through a list of 41 in `lib/tweets.js`; morning and evening use different places.
+
+## Email style (for Gmail Primary tab)
+- Emails look like a personal note from Ryan: plain text + minimal HTML, no buttons/colored boxes, links
+  written out, signed "Ryan / Destinations Daily", plain-text version included, List-Unsubscribe header.
+- Confirmation email and tip #1 ask the reader to reply and to drag the email to Primary (replies are a
+  strong "real contact" signal). Nothing guarantees Primary; Gmail decides per person.
 
 ## Key database tables
 `subscribers`, `content_cache` (tips/facts per destination+theme), `email_sends` + `email_events`
