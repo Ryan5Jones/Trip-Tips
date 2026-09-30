@@ -1,4 +1,5 @@
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata = {
   title: "Trip Tips: learn a place before you go",
@@ -16,7 +17,11 @@ export default function RootLayout({ children }) {
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        {/* Vercel Web Analytics: counts unique visitors (no cookies) */}
+        <Analytics />
+      </body>
     </html>
   );
 }

@@ -27,6 +27,7 @@ session (or person) can pick up where we left off. Last updated: 2026-09-29.
 | Resend | Sends the emails | Open tracking ON, click tracking OFF (never enabled; keep it off to help land in Gmail Primary). Tracking subdomain `email.destinationsdaily.com`. Webhook -> `/api/resend-webhook`. |
 | Anthropic API | Writes tips, facts and tweets | Model from `ANTHROPIC_MODEL` (default `claude-sonnet-5-5`). |
 | X API | Posting tweets | Pay-per-use, prepaid credits ($10 loaded 2026-09-29, auto-recharge off). |
+| Vercel Web Analytics | Unique website visitors, page views, referrers | `<Analytics />` in `app/layout.js` (package `@vercel/analytics`), added 2026-09-30. Needs the Analytics tab "Enable" click in Vercel; counts only from then on. Read via Vercel connector `count_pageviews` / `aggregate_pageviews`. |
 | Pixabay | Tweet photos | `PIXABAY_API_KEY`. Pexels also supported (`PEXELS_API_KEY`) but Pexels key issuance was paused. |
 | Google Workspace | Company email (Gmail) on destinationsdaily.com | Emails are sent From `tips@destinationsdaily.com` (EMAIL_FROM); `tips@` is an alias of Ryan's Workspace user, so subscriber replies land in his Gmail (set up + tested 2026-09-30). More aliases: Admin console -> Directory -> Users -> Ryan -> Alternate email addresses. |
 
