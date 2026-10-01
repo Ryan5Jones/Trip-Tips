@@ -34,7 +34,7 @@ session (or person) can pick up where we left off. Last updated: 2026-09-30 (lat
 ## Environment variables (in Vercel, project trip-tips-k9df), names only
 `NEXT_PUBLIC_SITE_URL` (must include `https://`), `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
 `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_REPLY_TO` (optional), `MAILING_ADDRESS`, `RESEND_WEBHOOK_SECRET`, `ANTHROPIC_API_KEY`,
-`CRON_SECRET`, `TIKTOK_CLIENT_KEY`, `TIKTOK_CLIENT_SECRET` (Sandbox keys), `X_API_KEY`, `X_API_SECRET`, `X_ACCESS_TOKEN`, `X_ACCESS_TOKEN_SECRET`, `PIXABAY_API_KEY`.
+`CRON_SECRET`, `REELS_SECRET` (random string, same value also in GitHub Actions secrets), `TIKTOK_CLIENT_KEY`, `TIKTOK_CLIENT_SECRET` (Sandbox keys), `X_API_KEY`, `X_API_SECRET`, `X_ACCESS_TOKEN`, `X_ACCESS_TOKEN_SECRET`, `PIXABAY_API_KEY`.
 
 ## Scheduled jobs (vercel.json, times in UTC)
 - `/api/cron/daily` 15:00: daily tip emails
@@ -199,6 +199,16 @@ lonelyplanet, CNTraveler, TravelLeisure, NatGeoTravel), `social_posts` (reply/qu
   caption daily" (no TikTok connection) so he can post by hand. Gotcha found: a stray space in a pasted env var broke the key; the code
   now `.trim()`s TIKTOK_CLIENT_KEY/SECRET. Untested so far: a real slide render (Ryan was asked to click Run on /api/cron/tiktok in Vercel).
   When connected: set `setting:tiktok_connect_open` false, test a draft with tiktok_mode "send", then leave "send" on.
+
+- **Instagram Reels, 2 a day (BUILT 2026-10-01, preview mode until Ryan says go):** Vercel can't run ffmpeg here (ffmpeg npm packages are blocked in
+  Claude's sandbox), so a GitHub Actions workflow (`.github/workflows/reels.yml`, `scripts/make-reel.sh`, runs 18:15 and 03:15 UTC, or manually via
+  Actions -> "Instagram reels" -> Run workflow with slot morning/evening) does the video. Flow: GET `/api/reels/job?slot=` (Bearer `REELS_SECRET`;
+  `lib/reels.js` writes content with `writeTikTok`, picks a matched photo, saves row in table `reels`) -> runner downloads the 4 slide images
+  (`/api/reels/slide/<id>/<n>`, shared renderer `lib/slideImage.js`, same meme style as TikTok) -> ffmpeg makes a 16.5 s 1080x1920 H.264 video with
+  cross-fades + slow zoom and a silent AAC track (no trending music possible through the API) -> POST `/api/reels/upload` (stored in bucket
+  `email-photos/reels/`, max ~4.3 MB because of Vercel's body limit; script re-encodes smaller if needed) -> POST `/api/reels/publish`, which posts
+  with `postReelToInstagram` (lib/meta.js, media_type REELS) ONLY when `setting:reels_mode` = "auto" (unset/"preview" = video is made but not posted).
+  Needs Ryan's `REELS_SECRET` in BOTH Vercel env and GitHub repo secret. Stats for reels not built yet.
 
 ## Future ideas (saved 2026-09-29, not started)
 Our edge: every subscriber tells us their destination AND travel dates, so ideas should use that.
