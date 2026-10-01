@@ -32,7 +32,7 @@ export default function FoodList({ token, place, cuisine, items, triedKeys }) {
   return (
     <div className="food">
       <p className="pg-kicker">Food to try · {place}</p>
-      <h1 className="pg-title">{cuisine ? `${cuisine} favorites` : `Eat like a local`}</h1>
+      <h1 className="pg-title">{cuisine ? `${cuisine.replace(/\s*\(.*?\)\s*/g, " ").trim()} favorites` : "Eat like a local"}</h1>
       <p className="pg-sub">Tap the ones you&apos;ve tried. Bring an appetite.</p>
       <div className="food-progress" aria-label={`${count} of ${items.length} tried`}>
         <span style={{ width: `${(count / items.length) * 100}%` }} />

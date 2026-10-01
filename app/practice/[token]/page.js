@@ -59,7 +59,7 @@ export default async function PracticePage({ params }) {
     .order("day", { ascending: false })
     .limit(60);
 
-  const place = sub.destination.split(",")[0].trim();
+  const place = sub.destination.split(",")[0].trim().replace(/\b\p{L}/gu, (c) => c.toUpperCase());
   const board = await getLeaderboard(sub).catch(() => []);
   const inviteUrl = tripShareUrl({
     destination: sub.destination,

@@ -38,7 +38,7 @@ export default async function FoodPage({ params }) {
   if (!list) return <Message>Your food list is almost ready. Please check back in a minute.</Message>;
 
   const { data: tried } = await db.from("food_tried").select("dish_key").eq("subscriber_id", sub.id);
-  const place = sub.destination.split(",")[0].trim();
+  const place = sub.destination.split(",")[0].trim().replace(/\b\p{L}/gu, (c) => c.toUpperCase());
 
   return (
     <main className="wrap food-wrap">
