@@ -68,6 +68,7 @@ Estimated spend per month is tracked in `social_state` key `spend:YYYY-MM`.
 
 ## Tweet style (Ryan's preferences)
 - Tweets are intentionally a little funnier than the emails (Ryan decided 2026-09-30); keep it that way.
+- Meme/humor formats (Ryan 2026-09-30): about 4 in 10 tweets and Facebook/Instagram captions are written as text-only memes ("POV:", "Nobody: / Me:", "Expectation vs Reality"); `maybeMeme()` / `MEME_CHANCE` in lib/tweets.js. TikTok slides are meme-style every day (`lib/tiktok.js`) with destinationsdaily.com on every slide.
 - Snappy, with a hook first, light humor, one emoji, and exactly one hashtag: the destination's name
   (e.g. #NewOrleans, #Tokyo) on daily tweets and quote tweets. Hashtags barely affect reach on X now; never use 3+. Humor is about the traveler's experience, never mocking a place,
   its people or culture.
