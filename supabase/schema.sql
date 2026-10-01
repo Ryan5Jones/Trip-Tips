@@ -93,3 +93,6 @@ alter table food_cache add column if not exists photos_v int not null default 1;
 
 -- Food list version: 2 = 4 entrees + 1 dessert + 1 alcoholic drink mix (added 2026-09-30)
 alter table food_cache add column if not exists list_v int not null default 1;
+
+-- Evidence the AI quoted to show the place serves the dish (added 2026-09-30)
+alter table food_places add column if not exists evidence text;
