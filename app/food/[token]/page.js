@@ -2,7 +2,7 @@
 // Opened from the daily email with the subscriber's private token (same style as the practice game).
 import { db } from "@/lib/db";
 import { getFoodList } from "@/lib/food";
-import { getPlaces } from "@/lib/places";
+import { chooseDishes } from "@/lib/foodPick";
 import FoodList from "@/components/FoodList";
 
 export const dynamic = "force-dynamic";
@@ -38,18 +38,19 @@ export default async function FoodPage({ params }) {
   }
   if (!list) return <Message>Your food list is almost ready. Please check back in a minute.</Message>;
 
+  // Only dishes with a good photo AND a verified restaurant are shown (falls back to photo-only if restaurants are off)
+  let shown = list.items;
   let places = {};
   try {
-    places = await getPlaces(sub.destination, list.items); // empty until the Google key + switch are on
+    ({ items: shown, places } = await chooseDishes(sub.destination, list.all || list.items, list.items));
   } catch (e) {
     console.error("FOOD_PLACES failed:", e);
   }
-
   const place = sub.destination.split(",")[0].trim().replace(/\b\p{L}/gu, (c) => c.toUpperCase());
 
   return (
     <main className="wrap food-wrap">
-      <FoodList place={place} cuisine={list.cuisine} items={list.items} places={places} />
+      <FoodList place={place} cuisine={list.cuisine} items={shown} places={places} />
     </main>
   );
 }
