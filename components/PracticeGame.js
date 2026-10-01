@@ -9,6 +9,56 @@ import { streakFrom } from "@/lib/streak";
 import LanguageGlobe from "@/components/LanguageGlobe";
 import Leaderboard from "@/components/Leaderboard";
 
+// Optional pronunciation: nothing ever plays by itself, only when a player taps a 🔊 button.
+const LANG_CODES = {
+  french: "fr-FR", japanese: "ja-JP", portuguese: "pt-PT", spanish: "es-ES", italian: "it-IT",
+  german: "de-DE", greek: "el-GR", mandarin: "zh-CN", chinese: "zh-CN", cantonese: "zh-HK",
+  korean: "ko-KR", thai: "th-TH", vietnamese: "vi-VN", turkish: "tr-TR", dutch: "nl-NL",
+  arabic: "ar-SA", czech: "cs-CZ", hungarian: "hu-HU", danish: "da-DK", icelandic: "is-IS",
+  indonesian: "id-ID", hebrew: "he-IL", russian: "ru-RU", polish: "pl-PL", swedish: "sv-SE",
+  norwegian: "nb-NO", finnish: "fi-FI", hindi: "hi-IN", swahili: "sw-KE", croatian: "hr-HR",
+  "mandarin chinese": "zh-CN", "brazilian portuguese": "pt-BR", "european portuguese": "pt-PT",
+};
+const langCodeOf = (p) => p.lang_code || LANG_CODES[String(p.language || "").toLowerCase()] || "";
+
+function useSpeech(sample) {
+  const [voices, setVoices] = useState([]);
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+    const load = () => setVoices(window.speechSynthesis.getVoices());
+    load();
+    window.speechSynthesis.onvoiceschanged = load;
+    return () => { window.speechSynthesis.onvoiceschanged = null; };
+  }, []);
+  const code = sample ? langCodeOf(sample) : "";
+  let voice = null;
+  if (code) {
+    voice =
+      voices.find((v) => v.lang.toLowerCase().replace("_", "-") === code.toLowerCase()) ||
+      voices.find((v) => v.lang.toLowerCase().startsWith(code.slice(0, 2).toLowerCase())) ||
+      null;
+  }
+  const speak = (p) => {
+    if (!voice || typeof window === "undefined") return;
+    const u = new SpeechSynthesisUtterance(p.native || p.phrase);
+    u.voice = voice;
+    u.lang = voice.lang;
+    u.rate = 0.85;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  };
+  return { canSpeak: Boolean(voice), speak };
+}
+
+function SpeakButton({ p, speak }) {
+  if (!speak) return null;
+  return (
+    <button type="button" className="pg-speak" onClick={() => speak(p)} aria-label={`Hear how to say ${p.phrase}`} title="Hear it">
+      🔊
+    </button>
+  );
+}
+
 const shuffle = (arr) => {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -100,26 +150,29 @@ function buildRound(phrases) {
   return qs;
 }
 
-function PhraseText({ p, big }) {
+function PhraseText({ p, big, speak }) {
   return (
     <div className={big ? "pg-phrase pg-phrase-big" : "pg-phrase"}>
       {p.native ? <span className="pg-native" lang={p.lang_code || undefined}>{p.native}</span> : null}
       <span className="pg-roman">{p.phrase}</span>
-      <span className="pg-say">say it: {p.pronunciation}</span>
+      <span className="pg-say">
+        say it: {p.pronunciation}
+        <SpeakButton p={p} speak={speak} />
+      </span>
     </div>
   );
 }
 
 const phraseLabel = (p) => (p.native ? `${p.native} (${p.phrase})` : p.phrase);
 
-function Choice({ q, result, onPick }) {
+function Choice({ q, result, onPick, speak }) {
   const [chosen, setChosen] = useState(null);
   return (
     <div>
       {q.type === "meaning" ? (
         <>
           <p className="pg-prompt">What does this mean?</p>
-          <PhraseText p={q.target} big />
+          <PhraseText p={q.target} big speak={speak} />
         </>
       ) : (
         <>
@@ -277,7 +330,6 @@ export default function PracticeGame({ token, place, destination, firstName, phr
   const [bestCombo, setBestCombo] = useState(0);
   const [rightCount, setRightCount] = useState(0);
   const [result, setResult] = useState(null); // { correct, gain, timedOut }
-  const [timeLeft, setTimeLeft] = useState(1); // fraction 0..1
   const [streak, setStreak] = useState(() => streakFrom(playedDays, localToday()));
   const [copied, setCopied] = useState(false);
   const [board, setBoard] = useState(initialBoard);
@@ -288,9 +340,12 @@ export default function PracticeGame({ token, place, destination, firstName, phr
     if (d.inviteUrl) setInviteUrl(d.inviteUrl);
     if (d.groupCode) setGroupCode(d.groupCode);
   };
-  const timeRef = useRef(1);
+  const startedRef = useRef(0); // when the current question appeared (for speed bonus)
+  const timerRef = useRef(null); // the timeout that ends a timed question
   const resolvedRef = useRef(false);
 
+  const { canSpeak, speak } = useSpeech(newest);
+  const sp = canSpeak ? speak : null;
   const q = qs[i];
 
   function start() {
@@ -303,8 +358,6 @@ export default function PracticeGame({ token, place, destination, firstName, phr
     setRightCount(0);
     setResult(null);
     resolvedRef.current = false;
-    timeRef.current = 1;
-    setTimeLeft(1);
     setStage("play");
   }
 
@@ -312,9 +365,11 @@ export default function PracticeGame({ token, place, destination, firstName, phr
   function resolve(correct, { timedOut = false } = {}) {
     if (resolvedRef.current) return;
     resolvedRef.current = true;
+    clearTimeout(timerRef.current);
+    const timeFrac = q.limit ? Math.max(0, 1 - (Date.now() - startedRef.current) / q.limit) : 0;
     const flat = q.type === "match";
     const base = q.type === "match" || q.type === "build" ? 150 : 100;
-    const speed = flat ? 0 : Math.round(timeRef.current * 50);
+    const speed = flat ? 0 : Math.round(timeFrac * 50);
     const comboBonus = Math.min(combo, 5) * 10;
     const gain = correct ? (base + speed + comboBonus) * (q.boss ? 2 : 1) : 0;
     setPoints((p) => p + gain);
@@ -329,27 +384,16 @@ export default function PracticeGame({ token, place, destination, firstName, phr
     setResult({ correct, gain, timedOut, msg: timedOut ? "Time's up!" : correct ? pick(GOOD) : pick(BAD) });
   }
 
-  // Countdown for timed questions
+  // Time limit for timed questions. One timeout per question (no ticking), and the bar drains with a CSS
+  // animation, so the game stays smooth even on slow phones.
   useEffect(() => {
-    if (stage !== "play" || !q || !q.limit || result) return;
-    const began = Date.now();
-    timeRef.current = 1;
-    setTimeLeft(1);
-    const id = setInterval(() => {
-      const f = 1 - (Date.now() - began) / q.limit;
-      if (f <= 0) {
-        clearInterval(id);
-        timeRef.current = 0;
-        setTimeLeft(0);
-        resolve(false, { timedOut: true });
-      } else {
-        timeRef.current = f;
-        setTimeLeft(f);
-      }
-    }, 100);
-    return () => clearInterval(id);
+    if (stage !== "play" || !q) return;
+    startedRef.current = Date.now();
+    if (!q.limit) return;
+    timerRef.current = setTimeout(() => resolve(false, { timedOut: true }), q.limit);
+    return () => clearTimeout(timerRef.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stage, i, result === null]);
+  }, [stage, i]);
 
   async function finish() {
     setStage("done");
@@ -418,7 +462,7 @@ export default function PracticeGame({ token, place, destination, firstName, phr
         </ul>
         <div className="pg-card">
           <p className="pg-label">Today&apos;s new phrase. Study it first!</p>
-          <PhraseText p={newest} big />
+          <PhraseText p={newest} big speak={sp} />
           <p className="pg-meaning">&ldquo;{newest.meaning}&rdquo;</p>
         </div>
         <button type="button" className="pg-go" onClick={start}>Start quest</button>
@@ -468,7 +512,7 @@ export default function PracticeGame({ token, place, destination, firstName, phr
         <ul className="pg-list">
           {[...phrases].reverse().map((p) => (
             <li key={p.idx}>
-              <PhraseText p={p} />
+              <PhraseText p={p} speak={sp} />
               <span className="pg-list-meaning">{p.meaning}</span>
             </li>
           ))}
@@ -495,14 +539,14 @@ export default function PracticeGame({ token, place, destination, firstName, phr
       </p>
       {q.limit ? (
         <div className="pg-timer" aria-hidden="true">
-          <span className={timeLeft < 0.3 ? "low" : ""} style={{ width: `${timeLeft * 100}%` }} />
+          <span key={i} className={result ? "paused" : ""} style={{ animationDuration: `${q.limit}ms` }} />
         </div>
       ) : null}
 
       <div key={i} className={result && !result.correct ? "pg-shake" : ""}>
         {q.type === "match" && <MatchQuestion pairs={q.pairs} onDone={(ok) => resolve(ok)} />}
         {q.type === "build" && <Build q={q} result={result} onCheck={(ok) => resolve(ok)} />}
-        {(q.type === "meaning" || q.type === "phrase") && <Choice q={q} result={result} onPick={(ok) => resolve(ok)} />}
+        {(q.type === "meaning" || q.type === "phrase") && <Choice q={q} result={result} onPick={(ok) => resolve(ok)} speak={canSpeak ? speak : null} />}
       </div>
 
       {result && (
@@ -516,6 +560,7 @@ export default function PracticeGame({ token, place, destination, firstName, phr
           ) : (
             <p>
               <b>{phraseLabel(q.target)}</b> means &ldquo;{q.target.meaning}&rdquo;. Say it: {q.target.pronunciation}
+              <SpeakButton p={q.target} speak={sp} />
             </p>
           )}
           <button type="button" className="pg-go" onClick={next}>

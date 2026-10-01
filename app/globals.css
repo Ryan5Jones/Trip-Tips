@@ -60,14 +60,14 @@ button:disabled { opacity:.6; cursor:wait; }
 .pg-prompt { margin:0 0 6px; font-weight:800; font-size:1.1rem; }
 .pg-go { width:100%; }
 .pg-secondary { width:100%; background:#fff; color:var(--ink); border:1.5px solid var(--ink); }
-.pg-secondary:hover { background:var(--paper); }
+@media (hover:hover) { .pg-secondary:hover { background:var(--paper); } }
 .pg-actions { display:grid; gap:10px; }
 .pg-listen { justify-self:start; background:var(--sun); color:var(--ink); padding:10px 16px; margin-top:6px; }
 .pg-listen:hover { background:#e0a800; }
 .pg-listen-big { font-size:1.2rem; padding:18px 24px; }
 .pg-options { display:grid; gap:10px; margin-top:14px; }
 .pg-option { text-align:left; background:#fff; color:var(--ink); border:1.5px solid var(--line); font-weight:600; padding:14px 16px; }
-.pg-option:hover:not(:disabled) { border-color:var(--ink); background:#fff; }
+@media (hover:hover) { .pg-option:hover:not(:disabled) { border-color:var(--ink); background:#fff; } }
 .pg-option:disabled { cursor:default; opacity:1; }
 .pg-option.is-right { border-color:#1d7a46; background:#e6f5ec; }
 .pg-option.is-wrong { border-color:#a12a1f; background:#fbeae8; }
@@ -81,7 +81,7 @@ button:disabled { opacity:.6; cursor:wait; }
 .pg-match { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .pg-col { display:grid; gap:10px; align-content:start; }
 .pg-tile { background:#fff; color:var(--ink); border:1.5px solid var(--line); font-weight:600; padding:12px; min-height:52px; overflow-wrap:anywhere; }
-.pg-tile:hover:not(:disabled) { border-color:var(--ink); background:#fff; }
+@media (hover:hover) { .pg-tile:hover:not(:disabled) { border-color:var(--ink); background:#fff; } }
 .pg-tile.is-picked { border-color:var(--ink); background:#fff7d6; }
 .pg-tile.is-done { border-color:#1d7a46; background:#e6f5ec; color:#1d7a46; cursor:default; opacity:1; }
 .pg-tile.is-wrong { border-color:#a12a1f; background:#fbeae8; }
@@ -105,15 +105,16 @@ button:disabled { opacity:.6; cursor:wait; }
 .pg-stage { margin:0; color:var(--muted); font-weight:700; font-size:.9rem; text-transform:uppercase; letter-spacing:.04em; }
 .pg-stage.is-boss { color:#a12a1f; }
 .pg-timer { height:8px; background:var(--line); border-radius:99px; overflow:hidden; }
-.pg-timer span { display:block; height:100%; background:#1d7a46; border-radius:99px; transition:width .1s linear; }
-.pg-timer span.low { background:#a12a1f; }
+.pg-timer span { display:block; width:100%; height:100%; background:#1d7a46; border-radius:99px; transform-origin:left center; animation:pg-drain linear forwards; }
+.pg-timer span.paused { animation-play-state:paused; }
+@keyframes pg-drain { 0% { transform:scaleX(1); background:#1d7a46; } 70% { background:#1d7a46; } 71% { background:#a12a1f; } 100% { transform:scaleX(0); background:#a12a1f; } }
 .pg-tray { min-height:62px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; background:#fff; border:2px dashed var(--line); border-radius:12px; padding:10px; margin-top:12px; }
 .pg-tray.is-right { border-style:solid; border-color:#1d7a46; background:#e6f5ec; }
 .pg-tray.is-wrong { border-style:solid; border-color:#a12a1f; background:#fbeae8; }
 .pg-tray-empty { color:var(--muted); font-weight:600; }
 .pg-bank { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
 .pg-chip { background:#fff; color:var(--ink); border:1.5px solid var(--ink); border-radius:10px; padding:10px 14px; font-size:1.05rem; min-width:44px; box-shadow:0 3px 0 var(--ink); }
-.pg-chip:hover:not(:disabled) { background:#fff7d6; }
+@media (hover:hover) { .pg-chip:hover:not(:disabled) { background:#fff7d6; } }
 .pg-chip.is-used { opacity:.25; box-shadow:none; }
 .pg-tray .pg-chip { box-shadow:none; background:#fff7d6; }
 .pg-build-actions { display:grid; grid-template-columns:1fr 2fr; gap:10px; margin-top:14px; }
@@ -128,7 +129,7 @@ button:disabled { opacity:.6; cursor:wait; }
 @keyframes pg-pop { 0% { transform:scale(.6); opacity:0; } 70% { transform:scale(1.15); } 100% { transform:scale(1); opacity:1; } }
 @keyframes pg-shake { 0%,100% { transform:translateX(0); } 25% { transform:translateX(-6px); } 75% { transform:translateX(6px); } }
 @keyframes pg-stamp { 0% { transform:rotate(-5deg) scale(2); opacity:0; } 100% { transform:rotate(-5deg) scale(1); opacity:.85; } }
-@media (prefers-reduced-motion:reduce) { .pg-combo, .pg-gain, .pg-stars .on, .pg-stamp, .pg-shake { animation:none; } .pg-timer span { transition:none; } }
+@media (prefers-reduced-motion:reduce) { .pg-combo, .pg-gain, .pg-stars .on, .pg-stamp, .pg-shake { animation:none; } }
 
 /* Globe on the Passport Quest results screen */
 .pg-globe-card { background:#fff; border:1.5px solid var(--line); border-radius:14px; padding:16px; display:grid; gap:8px; justify-items:center; text-align:center; }
@@ -158,3 +159,8 @@ button:disabled { opacity:.6; cursor:wait; }
 .pg-code-row { display:flex; align-items:center; gap:10px; }
 .pg-code code { font-size:1.2rem; font-weight:800; letter-spacing:.08em; background:var(--paper); padding:6px 10px; border-radius:8px; }
 .pg-join { display:grid; gap:8px; border-top:1.5px solid var(--line); padding-top:12px; }
+
+/* Snappier taps on phones: no double-tap delay, no hover that sticks after a touch */
+.pg button, .pg-board button { touch-action:manipulation; -webkit-tap-highlight-color:transparent; }
+.pg-speak { background:var(--sun); color:var(--ink); padding:2px 8px; margin-left:8px; border-radius:99px; font-size:1rem; line-height:1.4; }
+@media (hover:hover) { .pg-speak:hover { background:#e0a800; } }
