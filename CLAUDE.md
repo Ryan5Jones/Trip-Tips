@@ -129,8 +129,8 @@ lonelyplanet, CNTraveler, TravelLeisure, NatGeoTravel), `social_posts` (reply/qu
 
 ## Open items / ideas
 - **Replies shape each subscriber's tips (BUILT 2026-09-30; needs Ryan's 3 setup clicks, then flip `setting:replies_live`):**
-  Replies to tips@ already land in Ryan's Gmail. A Google Workspace routing rule ALSO delivers a copy to a Resend
-  inbound address (`<alias>@<id>.resend.app`); Resend fires the `email.received` webhook (same endpoint
+  Replies to tips@ already land in Ryan's Gmail. A Google Workspace routing rule ALSO delivers a copy to Ryan's Resend
+  inbound address `replies@deloitrenu.resend.app` (given 2026-09-30); Resend fires the `email.received` webhook (same endpoint
   `/api/resend-webhook`) -> `lib/replies.js` `handleInboundReply`: only mail from a known subscriber email is kept
   (nothing else is saved), robots/out-of-office ignored, quoted history stripped, saved to `replies`, AI extracts a
   fixed-vocabulary profile (party, first_trip, budget, pace, occasion, interests, dietary, up to 5 short cleaned
