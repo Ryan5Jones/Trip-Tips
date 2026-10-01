@@ -167,12 +167,9 @@ button:disabled { opacity:.6; cursor:wait; }
 
 /* Food to try */
 .food { display:grid; gap:12px; }
-.food-progress { height:10px; background:var(--line); border-radius:99px; overflow:hidden; }
-.food-progress span { display:block; height:100%; background:#1d7a46; border-radius:99px; transition:width .25s; }
 .food-list { list-style:none; margin:8px 0 0; padding:0; display:grid; gap:12px; }
 .food-item { background:#fff; border:1.5px solid var(--line); border-radius:14px; padding:12px; display:grid; grid-template-columns:auto 1fr; gap:12px; align-items:start; }
 .food-item:not(:has(.food-photo)) { grid-template-columns:1fr; }
-.food-item.is-done { border-color:#1d7a46; background:#f2faf5; }
 .food-photo { margin:0; width:120px; }
 .food-photo img { display:block; width:120px; height:120px; object-fit:cover; border-radius:10px; background:var(--paper); }
 .food-photo figcaption { font-size:.7rem; color:var(--muted); margin-top:2px; }
@@ -184,6 +181,4 @@ button:disabled { opacity:.6; cursor:wait; }
 .food-how { color:var(--muted); font-size:.95rem; }
 .food-place { font-size:.95rem; }
 .food-place a { white-space:nowrap; }
-.food-btn { background:#fff; color:var(--ink); border:1.5px solid var(--ink); padding:8px 14px; touch-action:manipulation; }
-.food-btn.is-done { background:#1d7a46; border-color:#1d7a46; color:#fff; }
 @media (max-width:420px) { .food-item { grid-template-columns:1fr; } .food-photo, .food-photo img { width:100%; } .food-photo img { height:200px; } }

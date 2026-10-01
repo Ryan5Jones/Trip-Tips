@@ -45,12 +45,11 @@ export default async function FoodPage({ params }) {
     console.error("FOOD_PLACES failed:", e);
   }
 
-  const { data: tried } = await db.from("food_tried").select("dish_key").eq("subscriber_id", sub.id);
   const place = sub.destination.split(",")[0].trim().replace(/\b\p{L}/gu, (c) => c.toUpperCase());
 
   return (
     <main className="wrap food-wrap">
-      <FoodList token={token} place={place} cuisine={list.cuisine} items={list.items} places={places} triedKeys={(tried || []).map((t) => t.dish_key)} />
+      <FoodList place={place} cuisine={list.cuisine} items={list.items} places={places} />
     </main>
   );
 }

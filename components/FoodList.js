@@ -1,78 +1,41 @@
-"use client";
-// The "Food to try" checklist. Ticks are saved as you go.
-import { useState } from "react";
-
+// The "Food to try" list: local foods and drinks with a photo and a high-rated place to try each one.
 const KIND = { dish: "Dish", snack: "Snack", dessert: "Dessert", drink: "Drink" };
 
-export default function FoodList({ token, place, cuisine, items, places = {}, triedKeys }) {
-  const [tried, setTried] = useState(() => new Set(triedKeys));
-  const [error, setError] = useState("");
-
-  async function toggle(key) {
-    const now = !tried.has(key);
-    const next = new Set(tried);
-    if (now) next.add(key); else next.delete(key);
-    setTried(next); // instant feedback
-    setError("");
-    try {
-      const res = await fetch("/api/food/toggle", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, key, tried: now }),
-      });
-      if (!res.ok) throw new Error("save failed");
-    } catch {
-      setTried(tried); // put it back
-      setError("Couldn't save that one. Check your connection and try again.");
-    }
-  }
-
-  const count = items.filter((x) => tried.has(x.key)).length;
-
+export default function FoodList({ place, cuisine, items, places = {} }) {
+  const culture = cuisine ? cuisine.replace(/\s*\(.*?\)\s*/g, " ").trim() : place;
   return (
     <div className="food">
       <p className="pg-kicker">Food to try · {place}</p>
-      <h1 className="pg-title">{cuisine ? `${cuisine.replace(/\s*\(.*?\)\s*/g, " ").trim()} favorites` : "Eat like a local"}</h1>
-      <p className="pg-sub">Foods and drinks that are specific to {cuisine ? cuisine.replace(/\s*\(.*?\)\s*/g, " ").trim() : place} culture, each with a high-rated place to try it. Tap the ones you&apos;ve tried.</p>
-      <div className="food-progress" aria-label={`${count} of ${items.length} tried`}>
-        <span style={{ width: `${(count / items.length) * 100}%` }} />
-      </div>
-      <p className="pg-fine">{count} of {items.length} tried{count === items.length ? ". You did it! 🎉" : ""}</p>
-      {error && <p className="error" role="alert">{error}</p>}
+      <h1 className="pg-title">{cuisine ? `${culture} favorites` : "Eat like a local"}</h1>
+      <p className="pg-sub">Foods and drinks that are specific to {culture} culture, each with a high-rated place to try it.</p>
       <ul className="food-list">
-        {items.map((x) => {
-          const done = tried.has(x.key);
-          return (
-            <li key={x.key} className={`food-item ${done ? "is-done" : ""}`}>
-              {x.photo ? (
-                <figure className="food-photo">
-                  <img src={x.photo.url} alt={x.name} loading="lazy" width="120" height="120" />
-                  <figcaption>
-                    <a href={x.photo.page} target="_blank" rel="noopener noreferrer">Photo: Wikipedia</a>
-                  </figcaption>
-                </figure>
-              ) : null}
-              <div className="food-body">
-                <p className="food-name">
-                  {x.name} <span className="food-kind">{KIND[x.kind] || "Dish"}</span>
+        {items.map((x) => (
+          <li key={x.key} className="food-item">
+            {x.photo ? (
+              <figure className="food-photo">
+                <img src={x.photo.url} alt={x.name} loading="lazy" width="120" height="120" />
+                <figcaption>
+                  <a href={x.photo.page} target="_blank" rel="noopener noreferrer">Photo: Wikipedia</a>
+                </figcaption>
+              </figure>
+            ) : null}
+            <div className="food-body">
+              <p className="food-name">
+                {x.name} <span className="food-kind">{KIND[x.kind] || "Dish"}</span>
+              </p>
+              {x.local_name && x.local_name !== x.name ? <p className="food-local">{x.local_name}</p> : null}
+              <p>{x.what}</p>
+              <p className="food-how">{x.how}</p>
+              {places[x.key] ? (
+                <p className="food-place">
+                  📍 Try it at <b>{places[x.key].name}</b> · ★ {places[x.key].rating.toFixed(1)}
+                  {places[x.key].count ? ` (${places[x.key].count.toLocaleString("en-US")} reviews)` : ""} ·{" "}
+                  <a href={places[x.key].url} target="_blank" rel="noopener noreferrer">Google Maps</a>
                 </p>
-                {x.local_name && x.local_name !== x.name ? <p className="food-local">{x.local_name}</p> : null}
-                <p>{x.what}</p>
-                <p className="food-how">{x.how}</p>
-                {places[x.key] ? (
-                  <p className="food-place">
-                    📍 Try it at <b>{places[x.key].name}</b> · ★ {places[x.key].rating.toFixed(1)}
-                    {places[x.key].count ? ` (${places[x.key].count.toLocaleString("en-US")} reviews)` : ""} ·{" "}
-                    <a href={places[x.key].url} target="_blank" rel="noopener noreferrer">Google Maps</a>
-                  </p>
-                ) : null}
-                <button type="button" className={done ? "food-btn is-done" : "food-btn"} aria-pressed={done} onClick={() => toggle(x.key)}>
-                  {done ? "✓ Tried it" : "I tried it"}
-                </button>
-              </div>
-            </li>
-          );
-        })}
+              ) : null}
+            </div>
+          </li>
+        ))}
       </ul>
     </div>
   );
