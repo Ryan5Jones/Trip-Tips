@@ -114,3 +114,8 @@ create table if not exists meta_posts (
   created_at timestamptz not null default now()
 );
 alter table meta_posts enable row level security;
+
+-- Facebook posts twice a day, Instagram once: one row per date + slot (added 2026-09-30)
+alter table meta_posts add column if not exists slot text not null default 'morning';
+alter table meta_posts drop constraint if exists meta_posts_pkey;
+alter table meta_posts add primary key (post_date, slot);

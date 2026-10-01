@@ -1,4 +1,4 @@
-// Daily Facebook Page + Instagram photo post. Runs once a day (vercel.json).
+// Facebook Page post twice a day (morning 17:00 UTC, evening 02:00 UTC) + Instagram post once a day (morning only). Ryan 2026-09-30.
 // Preview mode (default): writes the post and saves it to `meta_posts` WITHOUT posting.
 // Turn on posting: social_state key "setting:meta_mode" = "auto" (needs the META_* env vars in Vercel).
 // Manual preview: /api/cron/meta?secret=YOUR_CRON_SECRET  (add &regenerate=1 for a new draft, preview mode only)
@@ -23,12 +23,14 @@ export async function GET(req) {
   const auto = (await getSetting("meta_mode", "preview")) === "auto";
   const today = new Date().toISOString().slice(0, 10);
   const regenerate = url.searchParams.get("regenerate") === "1" && !auto;
+  const requested = url.searchParams.get("slot");
+  const slot = requested === "morning" || requested === "evening" ? requested : new Date().getUTCHours() >= 12 ? "morning" : "evening";
 
-  const { data: existing } = await db.from("meta_posts").select("*").eq("post_date", today).maybeSingle();
+  const { data: existing } = await db.from("meta_posts").select("*").eq("post_date", today).eq("slot", slot).maybeSingle();
   let row = existing;
 
   if (!row || regenerate) {
-    const topic = metaTopicFor(today);
+    const topic = metaTopicFor(today, slot);
     try {
       const captions = await writeCaptions(topic);
       // Photo: one that matches the tip/fact, else a general city photo
@@ -47,12 +49,12 @@ export async function GET(req) {
         if (p?.url) { src = p.url; credit = p.credit; }
       }
       if (!src) throw new Error("No photo found");
-      const photoUrl = await hostPhoto(src, today);
+      const photoUrl = await hostPhoto(src, `${today}-${slot}`);
       const { data, error } = await db
         .from("meta_posts")
         .upsert(
-          { post_date: today, destination: topic.destination, theme: topic.theme, instagram_caption: captions.instagram, facebook_caption: captions.facebook, photo_url: photoUrl, photo_credit: credit, status: "preview", error: null },
-          { onConflict: "post_date" }
+          { post_date: today, slot, destination: topic.destination, theme: topic.theme, instagram_caption: captions.instagram, facebook_caption: captions.facebook, photo_url: photoUrl, photo_credit: credit, status: "preview", error: null },
+          { onConflict: "post_date,slot" }
         )
         .select()
         .single();
@@ -65,7 +67,7 @@ export async function GET(req) {
   }
 
   if (!auto) {
-    return NextResponse.json({ mode: "preview (not posted; set setting:meta_mode to auto to post)", destination: row.destination, photo: row.photo_url, instagram: row.instagram_caption, facebook: row.facebook_caption });
+    return NextResponse.json({ mode: "preview (not posted; set setting:meta_mode to auto to post)", slot, destination: row.destination, photo: row.photo_url, instagram: row.instagram_caption, facebook: row.facebook_caption });
   }
 
   const cfg = metaConfigured();
@@ -76,16 +78,17 @@ export async function GET(req) {
     try { update.facebook_post_id = await postToFacebook(row.photo_url, row.facebook_caption); }
     catch (e) { console.error("META Facebook failed:", e); errors.push(`facebook: ${e.message}`); }
   }
-  if (!row.instagram_post_id && cfg.instagram) {
+  const wantInstagram = slot === "morning"; // Instagram: once a day only
+  if (wantInstagram && !row.instagram_post_id && cfg.instagram) {
     try { update.instagram_post_id = await postToInstagram(row.photo_url, row.instagram_caption); }
     catch (e) { console.error("META Instagram failed:", e); errors.push(`instagram: ${e.message}`); }
   }
-  const both = (row.facebook_post_id || update.facebook_post_id || !cfg.facebook) && (row.instagram_post_id || update.instagram_post_id || !cfg.instagram);
+  const both = (row.facebook_post_id || update.facebook_post_id || !cfg.facebook) && (!wantInstagram || row.instagram_post_id || update.instagram_post_id || !cfg.instagram);
   await db.from("meta_posts").update({
     ...update,
     status: both ? "posted" : "failed",
     error: errors.join(" | ").slice(0, 500) || null,
     posted_at: Object.keys(update).length ? new Date().toISOString() : row.posted_at,
-  }).eq("post_date", today);
-  return NextResponse.json({ mode: "posted", ...update, errors });
+  }).eq("post_date", today).eq("slot", slot);
+  return NextResponse.json({ mode: "posted", slot, ...update, errors });
 }

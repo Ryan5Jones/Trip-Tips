@@ -21,7 +21,7 @@ export async function GET(req) {
     instagram: await g(`${process.env.META_IG_USER_ID}?fields=username,id`),
   };
   if (url.searchParams.get("run") === "1") {
-    const res = await metaCron(new Request("https://x/api/cron/meta", { headers: { authorization: `Bearer ${process.env.CRON_SECRET}` } }));
+    const res = await metaCron(new Request(`https://x/api/cron/meta${url.searchParams.get("slot") ? "?slot=" + url.searchParams.get("slot") : ""}`, { headers: { authorization: `Bearer ${process.env.CRON_SECRET}` } }));
     out.cron = await res.json();
   }
   return NextResponse.json(out);
