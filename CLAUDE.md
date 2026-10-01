@@ -88,6 +88,14 @@ Estimated spend per month is tracked in `social_state` key `spend:YYYY-MM`.
 - Confirmation email and tip #1 ask the reader to reply and to drag the email to Primary (replies are a
   strong "real contact" signal). Nothing guarantees Primary; Gmail decides per person.
 
+## Test profiles (keep)
+- Tori's Lisbon test profile: a `subscribers` row for tori.tyson21@gmail.com, destination "lisbon, portugal",
+  start_date 2026-09-30 (already past, so the daily email job skips it: she gets NO daily emails), first_name Tori.
+  Ryan wants to keep it for testing Passport Quest and the friends leaderboard (her game link is
+  /practice/<her token>). Don't delete it unless Ryan asks. Her real Maui subscription is separate.
+- One-off test emails: recreate a temporary token-locked endpoint (settings `setting:diag_token` / `setting:test_email`),
+  trigger it with the Vercel connector's web fetch, then delete the endpoint and the two settings.
+
 ## Key database tables
 `subscribers`, `content_cache` (tips/facts per destination+theme), `email_sends` + `email_events`
 (open/click tracking; reports: views `tip_dropoff`, `days_left_dropoff`, `subscriber_engagement`),
