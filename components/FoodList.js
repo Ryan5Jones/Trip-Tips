@@ -1,5 +1,5 @@
 // The "Food to try" list: local foods and drinks with a photo and a high-rated place to try each one.
-const KIND = { dish: "Dish", snack: "Snack", dessert: "Dessert", drink: "Drink" };
+const KIND = { entree: "Entree", dish: "Entree", snack: "Entree", dessert: "Dessert", drink: "Drink" };
 
 export default function FoodList({ place, cuisine, items, places = {} }) {
   const culture = cuisine ? cuisine.replace(/\s*\(.*?\)\s*/g, " ").trim() : place;
@@ -21,7 +21,7 @@ export default function FoodList({ place, cuisine, items, places = {} }) {
             ) : null}
             <div className="food-body">
               <p className="food-name">
-                {x.name} <span className="food-kind">{KIND[x.kind] || "Dish"}</span>
+                {x.name} <span className="food-kind">{KIND[x.kind] || "Entree"}</span>
               </p>
               {x.local_name && x.local_name !== x.name ? <p className="food-local">{x.local_name}</p> : null}
               <p>{x.what}</p>
