@@ -88,7 +88,7 @@ Estimated spend per month is tracked in `social_state` key `spend:YYYY-MM`.
   Never guess from run-together addresses like "johnsboehme"; a wrong name is worse than none.
 - Photos in emails were tested 2026-09-30: even a small photo sent a fresh inbox (Tori) to Promotions, so
   `setting:email_photos` stays OFF. Photo matching code is reused for social posts.
-- Fun fact line is just "Fun fact: ..." (Ryan 2026-09-30 dropped the "bust out at dinner" wording). The food-day link line reads "We put together a list of high-rated restaurants for the food to try in <place>: <link>" (no "check them off").
+- Fun fact line is just "Fun fact: ..." (Ryan 2026-09-30 dropped the "bust out at dinner" wording). The food-day link line reads "We put together a list of foods that are truly local to <place>, with a high-rated restaurant to try each one: <link>" (no "check them off"); food page subtitle says the foods are specific to the culture.
 - Confirmation email and tip #1 ask the reader to reply and to drag the email to Primary (replies are a
   strong "real contact" signal). Nothing guarantees Primary; Gmail decides per person.
 
