@@ -139,7 +139,13 @@ lonelyplanet, CNTraveler, TravelLeisure, NatGeoTravel), `social_posts` (reply/qu
   preferences (cached in `personal_content_cache` by profile signature; falls back to the shared `content_cache`
   version on any error). Daily cron uses it. Email wording says "I use your answers to tailor your future tips" only
   when `setting:replies_live` is true (otherwise the old "It helps me make these tips better"). Reply text is untrusted:
-  never put it in a prompt except through `sanitizePrefs`/`describeProfile`. Possible later: auto-thank-you reply
+  STATUS 2026-09-30: code is live and dormant; Ryan postponed the Google Admin step. Remaining for Ryan (Claude must NOT
+  change Google Admin mail settings itself; walk him through it): Admin console -> Apps -> Google Workspace -> Gmail ->
+  Routing -> Routing CONFIGURE -> name it, tick Inbound only, "Also deliver to: Add more recipients" ->
+  replies@deloitrenu.resend.app, and Envelope filter "Only affect specific envelope recipients" -> single address
+  tips@destinationsdaily.com -> SAVE. Also confirm the Resend webhook has the `email.received` event ticked. Then test
+  with a reply, check the Vercel log line INBOUND_REPLY, and set `setting:replies_live` to true.
+  Reply text is untrusted: never put it in a prompt except through `sanitizePrefs`/`describeProfile`. Possible later: auto-thank-you reply
   (must skip auto-responders), a page where people see/clear what we learned.
 - **SMS option at signup (parked until 100 subscribers):** "Email me" or "Text me" choice; daily tip by text
   via Twilio (~1 cent/text, ~$1.15/mo number, ~$2-10/mo + ~$20 one-time A2P 10DLC registration, 1-3 weeks
