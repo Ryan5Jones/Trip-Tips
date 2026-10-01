@@ -121,7 +121,7 @@ lonelyplanet, CNTraveler, TravelLeisure, NatGeoTravel), `social_posts` (reply/qu
 - `NEXT_PUBLIC_SITE_URL` without `https://` broke the confirm redirect (500) and email links.
 - Email footer address comes from Vercel env `MAILING_ADDRESS`. Set to `tips@destinationsdaily.com` on
   2026-09-30 at Ryan's request (was his personal email). CAN-SPAM requires a physical postal address (street,
-  PO box or registered private mailbox); Ryan was told and chose tips@ for now. Swap in a postal address later.
+  PO box or registered private mailbox); Ryan was told and chose to keep tips@ (not a to-do item; don't remind him).
 - Vercel is on the free Hobby plan: each cron runs once a day, anytime within its scheduled hour (e.g. the
   15:00 UTC email job runs 8:00-8:59 AM Pacific). Pro (~$20/mo) gives per-minute precision. Cron requests
   don't always show up in log searches; check Supabase (last_sent_on, tweets, stats_updated_at) to confirm.
