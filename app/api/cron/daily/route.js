@@ -8,6 +8,7 @@ import { getEmailPhoto } from "@/lib/emailPhotos";
 import { THEMES } from "@/lib/content";
 import { firstNameFor } from "@/lib/names";
 import { getDailyPhrase, ensurePhrases } from "@/lib/phrases";
+import { getFoodList } from "@/lib/food";
 
 export const maxDuration = 300;
 
@@ -40,6 +41,9 @@ export async function GET(req) {
   // Switch "setting:replies_live": replies really reach us, so emails can say they tailor future tips
   const replyLive = String(await getSetting("replies_live", "false")) === "true";
 
+  // Switch "setting:food_list": on food-and-dining days (theme 2), link the "Food to try" page
+  const withFood = String(await getSetting("food_list", "false")) === "true";
+
   let sent = 0;
   let failed = 0;
   for (const s of subs) {
@@ -52,12 +56,14 @@ export async function GET(req) {
       const phrase = withPhrase ? await getDailyPhrase(s.destination, s.emails_sent, tip, fact).catch(() => null) : null;
       // Starter pack for the practice game: phrases 0..2 (or up to today's) must exist
       if (phrase) await ensurePhrases(s.destination, Math.max(2, s.emails_sent)).catch(() => null);
+      const foodDay = withFood && s.emails_sent % THEMES.length === 1;
+      if (foodDay) await getFoodList(s.destination).catch((e) => console.error("FOOD_LIST failed:", e));
       const daysLeft = Math.round((new Date(s.start_date) - new Date(today)) / 86400000);
       const tipNumber = s.emails_sent + 1;
       const resendEmailId = await sendDaily({
         email: s.email, destination: s.destination, token: s.token, daysLeft, tipNumber, tip, fact,
         startDate: s.start_date, endDate: s.end_date, personalLine, photo,
-        firstName: firstNameFor(s), phrase, groupCode: s.group_code || s.share_code, replyLive,
+        firstName: firstNameFor(s), phrase, groupCode: s.group_code || s.share_code, replyLive, foodDay,
       });
       // Record the send so opens/clicks can be matched to it (never blocks the email)
       if (resendEmailId) {

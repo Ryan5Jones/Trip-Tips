@@ -56,3 +56,19 @@ create table if not exists personal_content_cache (
   primary key (destination_key, theme_index, profile_sig)
 );
 alter table personal_content_cache enable row level security;
+
+-- Food to try (added 2026-09-30)
+create table if not exists food_cache (
+  destination_key text primary key,
+  cuisine text,
+  items jsonb not null,
+  created_at timestamptz not null default now()
+);
+alter table food_cache enable row level security;
+create table if not exists food_tried (
+  subscriber_id uuid not null references subscribers(id) on delete cascade,
+  dish_key text not null,
+  tried_at timestamptz not null default now(),
+  primary key (subscriber_id, dish_key)
+);
+alter table food_tried enable row level security;
