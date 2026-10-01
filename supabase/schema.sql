@@ -96,3 +96,21 @@ alter table food_cache add column if not exists list_v int not null default 1;
 
 -- Evidence the AI quoted to show the place serves the dish (added 2026-09-30)
 alter table food_places add column if not exists evidence text;
+
+-- Daily Facebook + Instagram posts (added 2026-09-30)
+create table if not exists meta_posts (
+  post_date date primary key,
+  destination text,
+  theme text,
+  instagram_caption text,
+  facebook_caption text,
+  photo_url text,
+  photo_credit text,
+  status text not null default 'preview',
+  instagram_post_id text,
+  facebook_post_id text,
+  error text,
+  posted_at timestamptz,
+  created_at timestamptz not null default now()
+);
+alter table meta_posts enable row level security;
