@@ -4,7 +4,7 @@ import { useState } from "react";
 
 const KIND = { dish: "Dish", snack: "Snack", dessert: "Dessert", drink: "Drink" };
 
-export default function FoodList({ token, place, cuisine, items, triedKeys }) {
+export default function FoodList({ token, place, cuisine, items, places = {}, triedKeys }) {
   const [tried, setTried] = useState(() => new Set(triedKeys));
   const [error, setError] = useState("");
 
@@ -59,6 +59,13 @@ export default function FoodList({ token, place, cuisine, items, triedKeys }) {
                 {x.local_name && x.local_name !== x.name ? <p className="food-local">{x.local_name}</p> : null}
                 <p>{x.what}</p>
                 <p className="food-how">{x.how}</p>
+                {places[x.key] ? (
+                  <p className="food-place">
+                    📍 Try it at <b>{places[x.key].name}</b> · ★ {places[x.key].rating.toFixed(1)}
+                    {places[x.key].count ? ` (${places[x.key].count.toLocaleString("en-US")} reviews)` : ""} ·{" "}
+                    <a href={places[x.key].url} target="_blank" rel="noopener noreferrer">Google Maps</a>
+                  </p>
+                ) : null}
                 <button type="button" className={done ? "food-btn is-done" : "food-btn"} aria-pressed={done} onClick={() => toggle(x.key)}>
                   {done ? "✓ Tried it" : "I tried it"}
                 </button>

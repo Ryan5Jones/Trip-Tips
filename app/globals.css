@@ -182,6 +182,8 @@ button:disabled { opacity:.6; cursor:wait; }
 .food-kind { font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin-left:6px; }
 .food-local { color:var(--muted); }
 .food-how { color:var(--muted); font-size:.95rem; }
+.food-place { font-size:.95rem; }
+.food-place a { white-space:nowrap; }
 .food-btn { background:#fff; color:var(--ink); border:1.5px solid var(--ink); padding:8px 14px; touch-action:manipulation; }
 .food-btn.is-done { background:#1d7a46; border-color:#1d7a46; color:#fff; }
 @media (max-width:420px) { .food-item { grid-template-columns:1fr; } .food-photo, .food-photo img { width:100%; } .food-photo img { height:200px; } }

@@ -72,3 +72,18 @@ create table if not exists food_tried (
   primary key (subscriber_id, dish_key)
 );
 alter table food_tried enable row level security;
+
+-- Best-rated place per dish, from Google Places (added 2026-09-30)
+create table if not exists food_places (
+  destination_key text not null,
+  dish_key text not null,
+  status text not null default 'ok',
+  place_id text,
+  name text,
+  rating numeric,
+  review_count int,
+  maps_uri text,
+  fetched_at timestamptz not null default now(),
+  primary key (destination_key, dish_key)
+);
+alter table food_places enable row level security;

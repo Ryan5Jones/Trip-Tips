@@ -2,6 +2,7 @@
 // Opened from the daily email with the subscriber's private token (same style as the practice game).
 import { db } from "@/lib/db";
 import { getFoodList } from "@/lib/food";
+import { getPlaces } from "@/lib/places";
 import FoodList from "@/components/FoodList";
 
 export const dynamic = "force-dynamic";
@@ -37,12 +38,19 @@ export default async function FoodPage({ params }) {
   }
   if (!list) return <Message>Your food list is almost ready. Please check back in a minute.</Message>;
 
+  let places = {};
+  try {
+    places = await getPlaces(sub.destination, list.items); // empty until the Google key + switch are on
+  } catch (e) {
+    console.error("FOOD_PLACES failed:", e);
+  }
+
   const { data: tried } = await db.from("food_tried").select("dish_key").eq("subscriber_id", sub.id);
   const place = sub.destination.split(",")[0].trim().replace(/\b\p{L}/gu, (c) => c.toUpperCase());
 
   return (
     <main className="wrap food-wrap">
-      <FoodList token={token} place={place} cuisine={list.cuisine} items={list.items} triedKeys={(tried || []).map((t) => t.dish_key)} />
+      <FoodList token={token} place={place} cuisine={list.cuisine} items={list.items} places={places} triedKeys={(tried || []).map((t) => t.dish_key)} />
     </main>
   );
 }
