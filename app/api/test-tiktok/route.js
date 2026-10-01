@@ -6,8 +6,8 @@ export async function GET(req) {
   const t = new URL(req.url).searchParams.get("t");
   const want = await getSetting("diag_token", null);
   if (!want || t !== want) return new NextResponse("Not found", { status: 404 });
-  const k = process.env.TIKTOK_CLIENT_KEY || "";
-  const s = process.env.TIKTOK_CLIENT_SECRET || "";
+  const k = (process.env.TIKTOK_CLIENT_KEY || "").trim();
+  const s = (process.env.TIKTOK_CLIENT_SECRET || "").trim();
   const info = { keyLen: k.length, keyTrimmedLen: k.trim().length, secretLen: s.length, secretTrimmedLen: s.trim().length };
   const res = await fetch("https://open.tiktokapis.com/v2/oauth/token/", {
     method: "POST",
