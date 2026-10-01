@@ -15,7 +15,7 @@ export default function FoodList({ place, cuisine, items, places = {} }) {
               <figure className="food-photo">
                 <img src={x.photo.url} alt={x.name} loading="lazy" width="120" height="120" />
                 <figcaption>
-                  <a href={x.photo.page} target="_blank" rel="noopener noreferrer">Photo: Wikipedia</a>
+                  <a href={x.photo.page} target="_blank" rel="noopener noreferrer">Photo: {x.photo.credit || "Wikipedia"}</a>
                 </figcaption>
               </figure>
             ) : null}

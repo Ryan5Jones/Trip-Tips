@@ -6,7 +6,7 @@ import { getPlaces } from "@/lib/places";
 import FoodList from "@/components/FoodList";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 60; // the first visit for a new destination writes the list
+export const maxDuration = 120; // the first visit for a new destination writes the list and finds photos
 export const metadata = {
   title: "Food to try · Destinations Daily",
   robots: { index: false, follow: false },

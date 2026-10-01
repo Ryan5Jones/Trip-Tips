@@ -87,3 +87,6 @@ create table if not exists food_places (
   primary key (destination_key, dish_key)
 );
 alter table food_places enable row level security;
+
+-- Food photo pipeline version: 2 = AI-checked appetizing photos (added 2026-09-30)
+alter table food_cache add column if not exists photos_v int not null default 1;
