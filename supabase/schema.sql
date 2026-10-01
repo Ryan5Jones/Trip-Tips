@@ -119,3 +119,9 @@ alter table meta_posts enable row level security;
 alter table meta_posts add column if not exists slot text not null default 'morning';
 alter table meta_posts drop constraint if exists meta_posts_pkey;
 alter table meta_posts add primary key (post_date, slot);
+
+-- Facebook + Instagram post stats, filled daily by /api/cron/meta-stats (added 2026-09-30)
+alter table meta_posts add column if not exists ig_reach int, add column if not exists ig_likes int, add column if not exists ig_comments int,
+  add column if not exists ig_saves int, add column if not exists ig_shares int, add column if not exists ig_views int,
+  add column if not exists fb_reach int, add column if not exists fb_reactions int, add column if not exists fb_comments int,
+  add column if not exists fb_shares int, add column if not exists stats_updated_at timestamptz;
