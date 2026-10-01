@@ -125,3 +125,21 @@ alter table meta_posts add column if not exists ig_reach int, add column if not 
   add column if not exists ig_saves int, add column if not exists ig_shares int, add column if not exists ig_views int,
   add column if not exists fb_reach int, add column if not exists fb_reactions int, add column if not exists fb_comments int,
   add column if not exists fb_shares int, add column if not exists stats_updated_at timestamptz;
+
+-- Daily TikTok photo carousel drafts (added 2026-09-30)
+create table if not exists tiktok_posts (
+  post_date date primary key,
+  destination text,
+  theme text,
+  hook text,
+  tip text,
+  fact text,
+  title text,
+  description text,
+  photo_url text,
+  status text not null default 'draft',
+  publish_id text,
+  error text,
+  created_at timestamptz not null default now()
+);
+alter table tiktok_posts enable row level security;
