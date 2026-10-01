@@ -32,3 +32,27 @@ alter table subscribers add column if not exists group_code text;
 create unique index if not exists subscribers_share_code_key on subscribers (share_code);
 create index if not exists subscribers_group_code_idx on subscribers (group_code);
 alter table practice_progress add column if not exists points int not null default 0;
+
+-- Replies shape each subscriber's tips (added 2026-09-30)
+alter table subscribers add column if not exists preferences jsonb not null default '{}'::jsonb;
+create table if not exists replies (
+  id uuid primary key default gen_random_uuid(),
+  subscriber_id uuid not null references subscribers(id) on delete cascade,
+  resend_email_id text unique,
+  received_at timestamptz not null default now(),
+  subject text,
+  body text,
+  extracted jsonb,
+  processed boolean not null default false
+);
+create index if not exists replies_subscriber_idx on replies (subscriber_id, received_at desc);
+alter table replies enable row level security;
+create table if not exists personal_content_cache (
+  destination_key text not null,
+  theme_index int not null,
+  profile_sig text not null,
+  tip text not null,
+  fact text not null,
+  primary key (destination_key, theme_index, profile_sig)
+);
+alter table personal_content_cache enable row level security;

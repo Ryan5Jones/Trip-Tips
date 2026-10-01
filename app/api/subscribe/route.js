@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { sendConfirmation } from "@/lib/email";
 import { cleanFirstName, firstNameFor } from "@/lib/names";
+import { getSetting } from "@/lib/settings";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -53,6 +54,7 @@ export async function POST(req) {
     await sendConfirmation({
       email: cleanEmail, destination: cleanDest, token: data.token,
       firstName: firstNameFor({ first_name: data.first_name, email: cleanEmail }),
+      replyLive: String(await getSetting("replies_live", "false")) === "true",
     });
   }
   return NextResponse.json({ ok: true, group: groupOut });

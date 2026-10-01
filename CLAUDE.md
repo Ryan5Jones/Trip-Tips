@@ -58,6 +58,7 @@ Change these with SQL; no redeploy needed. Env vars of the same meaning are fall
 | `setting:daily_phrase` | true | Adds "Today's <language> phrase" (phrase, native script if non-Latin, pronunciation, meaning, when to use it) after the fun fact. Mini-course order in `lib/phrases.js` (PHRASE_TOPICS, 30, then repeats); cached in `phrase_cache`; skipped for English-speaking destinations |
 | (game) | n/a | **Passport Quest** (phrase game) at `/practice/<subscriber token>` (`app/practice/[token]/page.js`, `components/PracticeGame.js`): arcade-style; audio is OPT-IN only: a small 🔊 button next to a phrase's written pronunciation plays it with the device voice, nothing ever autoplays (Ryan 2026-09-30). The question timer is one timeout plus a CSS-animated bar (no 10x/sec re-renders; Tori reported lag on taps). 3 hearts, countdown per question, speed + combo points, rounds: Warm-up, Match-up, Build it (assemble phrase from tiles), Boss round (double points); rank by phrases unlocked, passport stamp on results, then a spinning globe (`components/LanguageGlobe.js`, d3 + world-atlas loaded from jsdelivr in the browser) that turns to the destination country and fills it in more as phrases unlock (falls back to a flag card if the map can't load or the country is too small for the 110m map, e.g. Malta/Singapore). Saves {score: right answers, total} and streaks in `practice_progress` (POST `/api/practice/complete`). Uses unlocked phrases (max(3, emails_sent)); daily email links to it when a phrase is included |
 | (leaderboard) | n/a | **Friends leaderboard** in Passport Quest (`components/Leaderboard.js`, `lib/leaderboard.js`, GET `/api/practice/leaderboard`). Group = people who signed up through a shared-trip link: share links carry `g=<share_code>` (subscribers.share_code is a random public-safe code, NOT the private token); a friend signing up gets `subscribers.group_code = g`; group id = `group_code ?? share_code`. Points are saved per day in `practice_progress.points` (best of the day, capped 3500). Board shows first names ("Traveler" if unknown), points (this week / all time) and streaks only: never emails or tokens. Added 2026-09-30. **Friend code:** the board shows each player's group code (uppercase) with Copy; someone who is alone can paste a friend's code in "Join their group" (POST `/api/practice/join`). People already in a group with others can't switch (no accidental merges). |
+| `setting:replies_live` | (unset = off) | Turn ON only after reply capture works end-to-end (see Open items: Replies shape tips). Makes emails say replies are used to tailor future tips |
 | `setting:daily_personal_line` | true | Adds a rotating personal question ("Have you booked anything yet? Hit reply…") to daily emails from tip #2 on |
 Estimated spend per month is tracked in `social_state` key `spend:YYYY-MM`.
 
@@ -127,12 +128,19 @@ lonelyplanet, CNTraveler, TravelLeisure, NatGeoTravel), `social_posts` (reply/qu
   don't always show up in log searches; check Supabase (last_sent_on, tweets, stats_updated_at) to confirm.
 
 ## Open items / ideas
-- **Replies shape each subscriber's tips (to do):** receive replies at our site
-  (e.g. Resend inbound email or Google forwarding to a webhook), save them to Supabase linked to the
-  subscriber, have AI extract preferences ("traveling with kids", "foodie", "first time", "budget"), and feed
-  those into their future tip/fact generation (per-subscriber content instead of the shared cache for those
-  people). Once live, the reply prompt can honestly say "so I can tailor your future tips". Current wording is
-  "Hit reply and let me know. It helps me make these tips better." (true today).
+- **Replies shape each subscriber's tips (BUILT 2026-09-30; needs Ryan's 3 setup clicks, then flip `setting:replies_live`):**
+  Replies to tips@ already land in Ryan's Gmail. A Google Workspace routing rule ALSO delivers a copy to a Resend
+  inbound address (`<alias>@<id>.resend.app`); Resend fires the `email.received` webhook (same endpoint
+  `/api/resend-webhook`) -> `lib/replies.js` `handleInboundReply`: only mail from a known subscriber email is kept
+  (nothing else is saved), robots/out-of-office ignored, quoted history stripped, saved to `replies`, AI extracts a
+  fixed-vocabulary profile (party, first_trip, budget, pace, occasion, interests, dietary, up to 5 short cleaned
+  notes; never health/religion/names) into `subscribers.preferences` (applies to every row with that email).
+  `lib/personalContent.js` `getPersonalContent(sub, themeIndex)` rewrites that day's tip/fact for people with
+  preferences (cached in `personal_content_cache` by profile signature; falls back to the shared `content_cache`
+  version on any error). Daily cron uses it. Email wording says "I use your answers to tailor your future tips" only
+  when `setting:replies_live` is true (otherwise the old "It helps me make these tips better"). Reply text is untrusted:
+  never put it in a prompt except through `sanitizePrefs`/`describeProfile`. Possible later: auto-thank-you reply
+  (must skip auto-responders), a page where people see/clear what we learned.
 - **SMS option at signup (parked until 100 subscribers):** "Email me" or "Text me" choice; daily tip by text
   via Twilio (~1 cent/text, ~$1.15/mo number, ~$2-10/mo + ~$20 one-time A2P 10DLC registration, 1-3 weeks
   approval). Must have: consent checkbox, "Reply YES" confirmation, STOP/HELP, daytime-only sends. The daily

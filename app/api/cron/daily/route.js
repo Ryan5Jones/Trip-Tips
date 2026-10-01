@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { getContent } from "@/lib/content";
+import { getPersonalContent } from "@/lib/personalContent";
 import { sendDaily } from "@/lib/email";
 import { getSetting } from "@/lib/settings";
 import { checkMilestones } from "@/lib/milestones";
@@ -37,11 +37,14 @@ export async function GET(req) {
   // Supabase switch "setting:daily_phrase": add a daily phrase in the destination's language
   const withPhrase = String(await getSetting("daily_phrase", "false")) === "true";
 
+  // Switch "setting:replies_live": replies really reach us, so emails can say they tailor future tips
+  const replyLive = String(await getSetting("replies_live", "false")) === "true";
+
   let sent = 0;
   let failed = 0;
   for (const s of subs) {
     try {
-      const { tip, fact } = await getContent(s.destination, s.emails_sent);
+      const { tip, fact } = await getPersonalContent(s, s.emails_sent);
       let photo = null;
       if (withPhotos) {
         photo = await getEmailPhoto(s.destination, s.emails_sent % THEMES.length, tip, fact).catch(() => null);
@@ -54,7 +57,7 @@ export async function GET(req) {
       const resendEmailId = await sendDaily({
         email: s.email, destination: s.destination, token: s.token, daysLeft, tipNumber, tip, fact,
         startDate: s.start_date, endDate: s.end_date, personalLine, photo,
-        firstName: firstNameFor(s), phrase, groupCode: s.group_code || s.share_code,
+        firstName: firstNameFor(s), phrase, groupCode: s.group_code || s.share_code, replyLive,
       });
       // Record the send so opens/clicks can be matched to it (never blocks the email)
       if (resendEmailId) {

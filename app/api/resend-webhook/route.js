@@ -3,6 +3,7 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { db } from "@/lib/db";
+import { handleInboundReply } from "@/lib/replies";
 
 const TRACKED_EVENTS = new Set(["email.delivered", "email.opened", "email.clicked", "email.bounced"]);
 
@@ -39,6 +40,17 @@ export async function POST(req) {
   }
 
   const event = JSON.parse(payload);
+  // A copy of an email sent to tips@ (replies from subscribers) -> shape that subscriber's future tips
+  if (event.type === "email.received") {
+    try {
+      const outcome = await handleInboundReply(event.data);
+      console.log("INBOUND_REPLY", JSON.stringify(outcome));
+      return NextResponse.json({ ok: true });
+    } catch (e) {
+      console.error("INBOUND_REPLY failed:", e);
+      return NextResponse.json({ error: "Could not process reply" }, { status: 500 }); // Resend will retry
+    }
+  }
   if (!TRACKED_EVENTS.has(event.type)) return NextResponse.json({ ok: true });
 
   const to = event.data?.to;
