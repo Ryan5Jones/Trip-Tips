@@ -23,8 +23,9 @@ function Message({ children }) {
   );
 }
 
-export default async function FoodPage({ params }) {
+export default async function FoodPage({ params, searchParams }) {
   const { token } = await params;
+  const setIndex = Math.min(20, Math.max(0, parseInt((await searchParams)?.set, 10) || 0)); // which set of dishes (from the email link)
   if (!UUID.test(token || "")) return <Message>That link doesn&apos;t look right.</Message>;
 
   const { data: sub } = await db.from("subscribers").select("id, destination").eq("token", token).maybeSingle();
@@ -42,7 +43,7 @@ export default async function FoodPage({ params }) {
   let shown = list.items;
   let places = {};
   try {
-    ({ items: shown, places } = await chooseDishes(sub.destination, list.all || list.items, list.items));
+    ({ items: shown, places } = await chooseDishes(sub.destination, list.all || list.items, list.items, setIndex));
   } catch (e) {
     console.error("FOOD_PLACES failed:", e);
   }

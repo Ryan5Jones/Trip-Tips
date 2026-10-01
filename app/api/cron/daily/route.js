@@ -41,7 +41,7 @@ export async function GET(req) {
   // Switch "setting:replies_live": replies really reach us, so emails can say they tailor future tips
   const replyLive = String(await getSetting("replies_live", "false")) === "true";
 
-  // Switch "setting:food_list": on food-and-dining days (theme 2), link the "Food to try" page
+  // Switch "setting:food_list": every 5th email, link the "Food to try" page (a new set of dishes each time)
   const withFood = String(await getSetting("food_list", "false")) === "true";
 
   let sent = 0;
@@ -56,7 +56,7 @@ export async function GET(req) {
       const phrase = withPhrase ? await getDailyPhrase(s.destination, s.emails_sent, tip, fact).catch(() => null) : null;
       // Starter pack for the practice game: phrases 0..2 (or up to today's) must exist
       if (phrase) await ensurePhrases(s.destination, Math.max(2, s.emails_sent)).catch(() => null);
-      const foodDay = withFood && s.emails_sent % THEMES.length === 1;
+      const foodDay = withFood && s.emails_sent % 5 === 1; // tips #2, #7, #12, ... (each shows a new set of dishes)
       if (foodDay) await getFoodList(s.destination).catch((e) => console.error("FOOD_LIST failed:", e));
       const daysLeft = Math.round((new Date(s.start_date) - new Date(today)) / 86400000);
       const tipNumber = s.emails_sent + 1;
