@@ -143,3 +143,25 @@ create table if not exists tiktok_posts (
   created_at timestamptz not null default now()
 );
 alter table tiktok_posts enable row level security;
+
+-- Instagram Reels (two a day): content + video, posted by /api/reels/publish
+create table if not exists reels (
+  id uuid primary key default gen_random_uuid(),
+  post_date date not null,
+  slot text not null,
+  destination text,
+  theme text,
+  hook text,
+  tip text,
+  fact text,
+  title text,
+  description text,
+  photo_url text,
+  video_url text,
+  status text not null default 'drafted',
+  ig_media_id text,
+  error text,
+  created_at timestamptz not null default now(),
+  unique (post_date, slot)
+);
+alter table reels enable row level security;
